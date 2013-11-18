@@ -31,129 +31,131 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class IrcMessage implements Comparable<IrcMessage> {
-    public enum Type {
-        Plain(0x00001),
-        Notice(0x00002),
-        Action(0x00004),
-        Nick(0x00008),
-        Mode(0x00010),
-        Join(0x00020),
-        Part(0x00040),
-        Quit(0x00080),
-        Kick(0x00100),
-        Kill(0x00200),
-        Server(0x00400),
-        Info(0x00800),
-        Error(0x01000),
-        DayChange(0x02000),
-        Topic(0x04000),
-        NetsplitJoin(0x08000),
-        NetsplitQuit(0x10000),
-        Invite(0x20000);
-        int value;
-        static String[] filterList = {Type.Join.name(), Type.Part.name(), Type.Quit.name(), Type.Nick.name(), Type.Mode.name(), Type.Topic.name(), Type.DayChange.name()};
+	public enum Type {
+		Plain(0x00001),
+		Notice(0x00002),
+		Action(0x00004),
+		Nick(0x00008),
+		Mode(0x00010),
+		Join(0x00020),
+		Part(0x00040),
+		Quit(0x00080),
+		Kick(0x00100),
+		Kill(0x00200),
+		Server(0x00400),
+		Info(0x00800),
+		Error(0x01000),
+		DayChange(0x02000),
+		Topic(0x04000),
+		NetsplitJoin(0x08000),
+		NetsplitQuit(0x10000),
+		Invite(0x20000);
+		int value;
+		static String[] filterList = {Type.Join.name(), Type.Part.name(), Type.Quit.name(), Type.Nick.name(), Type.Mode.name(), Type.Topic.name(), Type.DayChange.name()};
 
-        Type(int value) {
-            this.value = value;
-        }
+		Type(int value) {
+			this.value = value;
+		}
 
-        public int getValue() {
-            return value;
-        }
+		public int getValue() {
+			return value;
+		}
 
-        public static Type getForValue(int value) { //TODO: optimize hashmap
-            for (Type type : Type.values()) {
-                if (type.value == value)
-                    return type;
-            }
-            return Plain;
-        }
+		public static Type getForValue(int value) { //TODO: optimize hashmap
+			for (Type type : Type.values()) {
+				if (type.value == value) {
+					return type;
+				}
+			}
+			return Plain;
+		}
 
-        public static String[] getFilterList() {
-            return filterList;
-        }
-    }
+		public static String[] getFilterList() {
+			return filterList;
+		}
+	}
 
-    public enum Flag {
-        None(0x00),
-        Self(0x01),
-        Highlight(0x02),
-        Redirected(0x04),
-        ServerMsg(0x08),
-        Backlog(0x80);
-        int value;
+	public enum Flag {
+		None(0x00),
+		Self(0x01),
+		Highlight(0x02),
+		Redirected(0x04),
+		ServerMsg(0x08),
+		Backlog(0x80);
+		int value;
 
-        Flag(int value) {
-            this.value = value;
-        }
+		Flag(int value) {
+			this.value = value;
+		}
 
-        public int getValue() {
-            return value;
-        }
-    }
+		public int getValue() {
+			return value;
+		}
+	}
 
-    ;
+	;
 
-    public Date timestamp; //TODO: timezones, Java bleh as usual
-    public int messageId;
-    public BufferInfo bufferInfo;
-    public Spannable content;
-    private String sender;
-    public Type type;
-    public byte flags;
-    public int senderColor;
+	public Date timestamp; //TODO: timezones, Java bleh as usual
+	public int messageId;
+	public BufferInfo bufferInfo;
+	public Spannable content;
+	private String sender;
+	public Type type;
+	public byte flags;
+	public int senderColor;
 
-    private ArrayList<String> urls = new ArrayList<String>();
-
-
-    @Override
-    public int compareTo(IrcMessage other) {
-        return ((Integer) messageId).compareTo((Integer) other.messageId);
-    }
-
-    @Override
-    public String toString() {
-        return getSender() + ": " + content;
-    }
+	private ArrayList<String> urls = new ArrayList<String>();
 
 
-    public String getTime() {
-        return String.format("%02d:%02d:%02d", timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
-    }
+	@Override
+	public int compareTo(IrcMessage other) {
+		return ((Integer) messageId).compareTo((Integer) other.messageId);
+	}
 
-    public void setSender(String sender) {
-        this.sender = sender;
-        this.senderColor = SenderColorHelper.getSenderColor(getNick());
-    }
+	@Override
+	public String toString() {
+		return getSender() + ": " + content;
+	}
 
-    public String getNick() {
-        return getSender().split("!")[0];
-    }
 
-    public void setFlag(Flag flag) {
-        this.flags |= flag.value;
-    }
+	public String getTime() {
+		return String.format("%02d:%02d:%02d", timestamp.getHours(), timestamp.getMinutes(),
+		                     timestamp.getSeconds());
+	}
 
-    public boolean isHighlighted() {
-        if (((flags & Flag.Highlight.value) != 0) && ((flags & Flag.Self.value) == 0)) {
-            return true;
-        }
-        return false;
-    }
+	public void setSender(String sender) {
+		this.sender = sender;
+		this.senderColor = SenderColorHelper.getSenderColor(getNick());
+	}
 
-    public boolean isSelf() {
-        return ((flags & Flag.Self.value) != 0);
-    }
+	public String getNick() {
+		return getSender().split("!")[0];
+	}
 
-    public ArrayList<String> getURLs() {
-        return urls;
-    }
+	public void setFlag(Flag flag) {
+		this.flags |= flag.value;
+	}
 
-    public boolean hasURLs() {
-        return !urls.isEmpty();
-    }
+	public boolean isHighlighted() {
+		if (((flags & Flag.Highlight.value) != 0) && ((flags & Flag.Self.value) == 0)) {
+			return true;
+		}
+		return false;
+	}
 
-    public String getSender() {
-        return sender;
-    }
+	public boolean isSelf() {
+		return ((flags & Flag.Self.value) != 0);
+	}
+
+	public ArrayList<String> getURLs() {
+		return urls;
+	}
+
+	public boolean hasURLs() {
+		return !urls.isEmpty();
+	}
+
+	public String getSender() {
+		return sender;
+	}
 }

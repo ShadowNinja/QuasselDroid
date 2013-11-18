@@ -31,21 +31,21 @@ import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeSerializer;
 import java.io.IOException;
 
 public class UnsignedInteger implements QMetaTypeSerializer<Long> {
-    private int size = 0; // Bits
+	private int size = 0; // Bits
 
-    public UnsignedInteger(int size) {
-        this.size = size;
-    }
+	public UnsignedInteger(int size) {
+		this.size = size;
+	}
 
-    @Override
-    public void serialize(QDataOutputStream stream, Long data,
-                          DataStreamVersion version) throws IOException {
-        stream.writeUInt(data, this.size);
-    }
+	@Override
+	public void serialize(QDataOutputStream stream, Long data,
+	                      DataStreamVersion version) throws IOException {
+		stream.writeUInt(data, this.size);
+	}
 
-    @Override
-    public Long unserialize(QDataInputStream stream, DataStreamVersion version)
-            throws IOException {
-        return stream.readUInt(this.size);
-    }
+	@Override
+	public Long unserialize(QDataInputStream stream, DataStreamVersion version)
+	throws IOException {
+		return stream.readUInt(this.size);
+	}
 }

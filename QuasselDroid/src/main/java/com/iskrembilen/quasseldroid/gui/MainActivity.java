@@ -78,383 +78,408 @@ import java.lang.reflect.Field;
 
 public class MainActivity extends SherlockFragmentActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+	private static final String TAG = MainActivity.class.getSimpleName();
 
-    public static final String BUFFER_ID_EXTRA = "bufferid";
-    public static final String BUFFER_NAME_EXTRA = "buffername";
-    private static final long BACK_THRESHOLD = 4000;
-    private static final String DRAWER_BUFFER_OPEN = "bufferdrawer";
-    private static final String DRAWER_NICKS_OPEN = "nicksdrawer";
+	public static final String BUFFER_ID_EXTRA = "bufferid";
+	public static final String BUFFER_NAME_EXTRA = "buffername";
+	private static final long BACK_THRESHOLD = 4000;
+	private static final String DRAWER_BUFFER_OPEN = "bufferdrawer";
+	private static final String DRAWER_NICKS_OPEN = "nicksdrawer";
 
-    SharedPreferences preferences;
-    OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+	SharedPreferences preferences;
+	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
-    private DrawerLayout drawer;
-    private ActionBarDrawerToggle drawerToggle;
+	private DrawerLayout drawer;
+	private ActionBarDrawerToggle drawerToggle;
 
-    private int currentTheme;
-    private Boolean showLag = false;
+	private int currentTheme;
+	private Boolean showLag = false;
 
-    private Fragment chatFragment;
-    private Fragment bufferFragment;
-    private Fragment nickFragment;
+	private Fragment chatFragment;
+	private Fragment bufferFragment;
+	private Fragment nickFragment;
 
-    private int openedBuffer = -1;
-    private boolean isDrawerOpen = false;
+	private int openedBuffer = -1;
+	private boolean isDrawerOpen = false;
 
-    private long lastBackPressed = 0;
+	private long lastBackPressed = 0;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "MainActivity created");
-        setTheme(ThemeUtil.theme);
-        super.onCreate(savedInstanceState);
-        currentTheme = ThemeUtil.theme;
-        setContentView(R.layout.main_layout);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "MainActivity created");
+		setTheme(ThemeUtil.theme);
+		super.onCreate(savedInstanceState);
+		currentTheme = ThemeUtil.theme;
+		setContentView(R.layout.main_layout);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer);
+		drawer = (DrawerLayout) findViewById(R.id.drawer);
 
-        try {
-            Field mLeftDragger = drawer.getClass().getDeclaredField("mLeftDragger");
-            mLeftDragger.setAccessible(true);
-            ViewDragHelper leftDraggerObj = (ViewDragHelper) mLeftDragger.get(drawer);
-            Field mLeftEdgeSize = leftDraggerObj.getClass().getDeclaredField("mEdgeSize");
-            mLeftEdgeSize.setAccessible(true);
-            int leftEdge = mLeftEdgeSize.getInt(leftDraggerObj);
-            mLeftEdgeSize.setInt(leftDraggerObj, leftEdge * 3);
+		try {
+			Field mLeftDragger = drawer.getClass().getDeclaredField("mLeftDragger");
+			mLeftDragger.setAccessible(true);
+			ViewDragHelper leftDraggerObj = (ViewDragHelper) mLeftDragger.get(drawer);
+			Field mLeftEdgeSize = leftDraggerObj.getClass().getDeclaredField("mEdgeSize");
+			mLeftEdgeSize.setAccessible(true);
+			int leftEdge = mLeftEdgeSize.getInt(leftDraggerObj);
+			mLeftEdgeSize.setInt(leftDraggerObj, leftEdge * 3);
 
-            Field mRightDragger = drawer.getClass().getDeclaredField("mRightDragger");
-            mRightDragger.setAccessible(true);
-            ViewDragHelper rightDraggerObj = (ViewDragHelper) mRightDragger.get(drawer);
-            Field mRightEdgeSize = rightDraggerObj.getClass().getDeclaredField("mEdgeSize");
-            mRightEdgeSize.setAccessible(true);
-            int rightEdge = mRightEdgeSize.getInt(rightDraggerObj);
-            mRightEdgeSize.setInt(rightDraggerObj, rightEdge * 3);
-        } catch (Exception e) {
-            Log.e(TAG, "Setting the draggable zone for the drawers failed!", e);
-        }
+			Field mRightDragger = drawer.getClass().getDeclaredField("mRightDragger");
+			mRightDragger.setAccessible(true);
+			ViewDragHelper rightDraggerObj = (ViewDragHelper) mRightDragger.get(drawer);
+			Field mRightEdgeSize = rightDraggerObj.getClass().getDeclaredField("mEdgeSize");
+			mRightEdgeSize.setAccessible(true);
+			int rightEdge = mRightEdgeSize.getInt(rightDraggerObj);
+			mRightEdgeSize.setInt(rightDraggerObj, rightEdge * 3);
+		} catch (Exception e) {
+			Log.e(TAG, "Setting the draggable zone for the drawers failed!", e);
+		}
 
-        if (savedInstanceState != null) {
-            Log.d(TAG, "MainActivity has savedInstanceState");
-            openedBuffer = savedInstanceState.getInt(BUFFER_ID_EXTRA);
-            isDrawerOpen = savedInstanceState.getBoolean(DRAWER_BUFFER_OPEN);
-            if (savedInstanceState.getBoolean(DRAWER_NICKS_OPEN)) drawer.openDrawer(Gravity.RIGHT);
-            FragmentManager manager = getSupportFragmentManager();
-            bufferFragment = manager.findFragmentById(R.id.left_drawer);
-            nickFragment = manager.findFragmentById(R.id.right_drawer);
-            Fragment fragment = manager.findFragmentById(R.id.main_content_container);
-            if (fragment.getClass() == ChatFragment.class) {
-                chatFragment = fragment;
-            }
-        } else {
-            chatFragment = ChatFragment.newInstance();
-            nickFragment = NickListFragment.newInstance();
-            bufferFragment = BufferFragment.newInstance();
-        }
+		if (savedInstanceState != null) {
+			Log.d(TAG, "MainActivity has savedInstanceState");
+			openedBuffer = savedInstanceState.getInt(BUFFER_ID_EXTRA);
+			isDrawerOpen = savedInstanceState.getBoolean(DRAWER_BUFFER_OPEN);
+			if (savedInstanceState.getBoolean(DRAWER_NICKS_OPEN)) {
+				drawer.openDrawer(Gravity.RIGHT);
+			}
+			FragmentManager manager = getSupportFragmentManager();
+			bufferFragment = manager.findFragmentById(R.id.left_drawer);
+			nickFragment = manager.findFragmentById(R.id.right_drawer);
+			Fragment fragment = manager.findFragmentById(R.id.main_content_container);
+			if (fragment.getClass() == ChatFragment.class) {
+				chatFragment = fragment;
+			}
+		} else {
+			chatFragment = ChatFragment.newInstance();
+			nickFragment = NickListFragment.newInstance();
+			bufferFragment = BufferFragment.newInstance();
+		}
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
-        drawerToggle = new ActionBarDrawerToggle(
-                this,                   /* host Activity */
-                drawer,                 /* DrawerLayout object */
-                R.drawable.ic_drawer,   /* nav drawer icon to replace 'Up' caret */
-                R.string.drawer_open,   /* "open drawer" description */
-                R.string.drawer_close   /* "close drawer" description */
-        ) {
+		drawerToggle = new ActionBarDrawerToggle(
+		        this,                   /* host Activity */
+		        drawer,                 /* DrawerLayout object */
+		        R.drawable.ic_drawer,   /* nav drawer icon to replace 'Up' caret */
+		        R.string.drawer_open,   /* "open drawer" description */
+		        R.string.drawer_close   /* "close drawer" description */
+		) {
 
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View drawerView) {
-                Log.d(TAG, "drawer closed");
-                Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
-                if (drawerFragment != null) drawerFragment.setMenuVisibility(false);
-                if (chatFragment != null) chatFragment.setMenuVisibility(true);
+			/** Called when a drawer has settled in a completely closed state. */
+			public void onDrawerClosed(View drawerView) {
+				Log.d(TAG, "drawer closed");
+				Fragment drawerFragment = getSupportFragmentManager().findFragmentById(
+				                                  drawerView.getId());
+				if (drawerFragment != null) {
+					drawerFragment.setMenuVisibility(false);
+				}
+				if (chatFragment != null) {
+					chatFragment.setMenuVisibility(true);
+				}
 
-                if (openedBuffer != -1) {
-                    NetworkCollection networks = NetworkCollection.getInstance();
-                    Buffer buffer = networks.getBufferById(openedBuffer);
-                    if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
-                        getSupportActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
-                    else
-                        getSupportActionBar().setTitle(buffer.getInfo().name);
-                } else {
-                    getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
-                    invalidateOptionsMenu();
-                }
-                if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
-                    chatFragment.setUserVisibleHint(true);
-                    BusProvider.getInstance().post(new UpdateReadBufferEvent());
-                }
-            }
+				if (openedBuffer != -1) {
+					NetworkCollection networks = NetworkCollection.getInstance();
+					Buffer buffer = networks.getBufferById(openedBuffer);
+					if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer) {
+						getSupportActionBar().setTitle(networks.getNetworkById(
+						                                       buffer.getInfo().networkId).getName());
+					} else {
+						getSupportActionBar().setTitle(buffer.getInfo().name);
+					}
+				} else {
+					getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+					invalidateOptionsMenu();
+				}
+				if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
+					chatFragment.setUserVisibleHint(true);
+					BusProvider.getInstance().post(new UpdateReadBufferEvent());
+				}
+			}
 
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
-                    if (chatFragment != null) chatFragment.setUserVisibleHint(false);
-                }
-                Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
-                if (drawerFragment != null) drawerFragment.setMenuVisibility(true);
-                if (chatFragment != null) chatFragment.setMenuVisibility(false);
+			/** Called when a drawer has settled in a completely open state. */
+			public void onDrawerOpened(View drawerView) {
+				if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
+					if (chatFragment != null) {
+						chatFragment.setUserVisibleHint(false);
+					}
+				}
+				Fragment drawerFragment = getSupportFragmentManager().findFragmentById(
+				                                  drawerView.getId());
+				if (drawerFragment != null) {
+					drawerFragment.setMenuVisibility(true);
+				}
+				if (chatFragment != null) {
+					chatFragment.setMenuVisibility(false);
+				}
 
-                hideKeyboard(bufferFragment.getView());
+				hideKeyboard(bufferFragment.getView());
 
-                getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
-                invalidateOptionsMenu();
-            }
-        };
+				getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+				invalidateOptionsMenu();
+			}
+		};
 
-        // Set the drawer toggle as the DrawerListener
-        drawer.setDrawerListener(drawerToggle);
+		// Set the drawer toggle as the DrawerListener
+		drawer.setDrawerListener(drawerToggle);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
 
-        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
+		sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(getResources().getString(R.string.preference_show_lag))) {
-                    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-                    if (!showLag) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            setActionBarSubtitle("");
-                        } else {
-                            getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if (key.equals(getResources().getString(R.string.preference_show_lag))) {
+					showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+					if (!showLag) {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+							setActionBarSubtitle("");
+						} else {
+							getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
 
-                        }
-                    }
-                }
+						}
+					}
+				}
 
-            }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
-    }
+			}
+		};
+		preferences.registerOnSharedPreferenceChangeListener(
+		        sharedPreferenceChangeListener); //To avoid GC issues
+	}
 
-    private void setActionBarSubtitle(String subtitle) {
-        getSupportActionBar().setSubtitle(subtitle);
-    }
+	private void setActionBarSubtitle(String subtitle) {
+		getSupportActionBar().setSubtitle(subtitle);
+	}
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        drawerToggle.syncState();
-        isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
-    }
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		// Sync the toggle state after onRestoreInstanceState has occurred.
+		drawerToggle.syncState();
+		isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
+	}
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
-        if (ThemeUtil.theme != currentTheme) {
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
-    }
+	@Override
+	protected void onStart() {
+		super.onStart();
+		bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
+		if (ThemeUtil.theme != currentTheme) {
+			Intent intent = new Intent(this, MainActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}
+	}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        BusProvider.getInstance().register(this);
-        if (!Quasseldroid.connected) {
-            returnToLogin();
-        }
-        NetworkCollection networks = NetworkCollection.getInstance();
-        if (openedBuffer != -1 && networks != null && networks.getBufferById(openedBuffer) == null) {
-            openedBuffer = -1;
-            BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
-            drawer.closeDrawer(Gravity.RIGHT);
-            drawer.openDrawer(Gravity.LEFT);
-            return;
-        }
-        if (isDrawerOpen && bufferFragment != null) {
-            drawer.openDrawer(Gravity.LEFT);
-            if (chatFragment != null) chatFragment.setUserVisibleHint(false);
-        } else drawer.closeDrawer(Gravity.LEFT);
-        hideKeyboard(drawer);
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		BusProvider.getInstance().register(this);
+		if (!Quasseldroid.connected) {
+			returnToLogin();
+		}
+		NetworkCollection networks = NetworkCollection.getInstance();
+		if (openedBuffer != -1 && networks != null
+		                && networks.getBufferById(openedBuffer) == null) {
+			openedBuffer = -1;
+			BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
+			drawer.closeDrawer(Gravity.RIGHT);
+			drawer.openDrawer(Gravity.LEFT);
+			return;
+		}
+		if (isDrawerOpen && bufferFragment != null) {
+			drawer.openDrawer(Gravity.LEFT);
+			if (chatFragment != null) {
+				chatFragment.setUserVisibleHint(false);
+			}
+		} else {
+			drawer.closeDrawer(Gravity.LEFT);
+		}
+		hideKeyboard(drawer);
+	}
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
-        BusProvider.getInstance().unregister(this);
+	@Override
+	protected void onPause() {
+		super.onPause();
+		isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
+		BusProvider.getInstance().unregister(this);
 
-    }
+	}
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        unbindService(focusConnection);
-    }
+	@Override
+	protected void onStop() {
+		super.onStop();
+		unbindService(focusConnection);
+	}
 
-    @Override
-    protected void onDestroy() {
-        preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
-        super.onDestroy();
-    }
+	@Override
+	protected void onDestroy() {
+		preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+		super.onDestroy();
+	}
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG, "Saving instance state");
-        outState.putInt(BUFFER_ID_EXTRA, openedBuffer);
-        outState.putBoolean(DRAWER_BUFFER_OPEN, drawer.isDrawerOpen(Gravity.LEFT));
-        outState.putBoolean(DRAWER_NICKS_OPEN, drawer.isDrawerOpen(Gravity.RIGHT));
-        super.onSaveInstanceState(outState);
-    }
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		Log.d(TAG, "Saving instance state");
+		outState.putInt(BUFFER_ID_EXTRA, openedBuffer);
+		outState.putBoolean(DRAWER_BUFFER_OPEN, drawer.isDrawerOpen(Gravity.LEFT));
+		outState.putBoolean(DRAWER_NICKS_OPEN, drawer.isDrawerOpen(Gravity.RIGHT));
+		super.onSaveInstanceState(outState);
+	}
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        Log.d(TAG, "Configuration changed");
-        super.onConfigurationChanged(newConfig);
-        drawerToggle.onConfigurationChanged(newConfig);
-    }
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		Log.d(TAG, "Configuration changed");
+		super.onConfigurationChanged(newConfig);
+		drawerToggle.onConfigurationChanged(newConfig);
+	}
 
-    @Override
-    public void onBackPressed() {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastBackPressed < BACK_THRESHOLD) super.onBackPressed();
-        else {
-            Toast.makeText(this, getString(R.string.pressed_back_toast), Toast.LENGTH_SHORT).show();
-            lastBackPressed = currentTime;
-        }
-    }
+	@Override
+	public void onBackPressed() {
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - lastBackPressed < BACK_THRESHOLD) {
+			super.onBackPressed();
+		} else {
+			Toast.makeText(this, getString(R.string.pressed_back_toast), Toast.LENGTH_SHORT).show();
+			lastBackPressed = currentTime;
+		}
+	}
 
-    @Override
-    public boolean onSearchRequested() {
-        BusProvider.getInstance().post(new CompleteNickEvent());
-        return false; //Activity ate the request
-    }
+	@Override
+	public boolean onSearchRequested() {
+		BusProvider.getInstance().post(new CompleteNickEvent());
+		return false; //Activity ate the request
+	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.base_menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.base_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                if (drawer.isDrawerOpen(Gravity.LEFT)) {
-                    drawer.closeDrawer(Gravity.LEFT);
-                } else {
-                    drawer.openDrawer(Gravity.LEFT);
-                }
-                return true;
-            case R.id.menu_preferences:
-                Intent i = new Intent(MainActivity.this, PreferenceView.class);
-                startActivity(i);
-                return true;
-            case R.id.menu_disconnect:
-                BusProvider.getInstance().post(new DisconnectCoreEvent());
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			if (drawer.isDrawerOpen(Gravity.LEFT)) {
+				drawer.closeDrawer(Gravity.LEFT);
+			} else {
+				drawer.openDrawer(Gravity.LEFT);
+			}
+			return true;
+		case R.id.menu_preferences:
+			Intent i = new Intent(MainActivity.this, PreferenceView.class);
+			startActivity(i);
+			return true;
+		case R.id.menu_disconnect:
+			BusProvider.getInstance().post(new DisconnectCoreEvent());
+			startActivity(new Intent(this, LoginActivity.class));
+			finish();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
-    private void hideKeyboard(View view) {
-        if (view != null) {
-            view.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-        }
-    }
+	private void hideKeyboard(View view) {
+		if (view != null) {
+			view.requestFocus();
+			InputMethodManager imm = (InputMethodManager) getSystemService(
+			                                 Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+		}
+	}
 
-    @Subscribe
-    public void onInitProgressed(InitProgressEvent event) {
-        FragmentManager manager = getSupportFragmentManager();
-        Fragment currentFragment = manager.findFragmentById(R.id.main_content_container);
-        if (event.done) {
-            if (currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
-                FragmentTransaction trans = manager.beginTransaction();
-                trans.replace(R.id.main_content_container, chatFragment);
+	@Subscribe
+	public void onInitProgressed(InitProgressEvent event) {
+		FragmentManager manager = getSupportFragmentManager();
+		Fragment currentFragment = manager.findFragmentById(R.id.main_content_container);
+		if (event.done) {
+			if (currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
+				FragmentTransaction trans = manager.beginTransaction();
+				trans.replace(R.id.main_content_container, chatFragment);
 
-                //Initialize the buffer drawer
-                trans.add(R.id.left_drawer, bufferFragment);
-                drawer.openDrawer(Gravity.LEFT);
-                isDrawerOpen = true;
+				//Initialize the buffer drawer
+				trans.add(R.id.left_drawer, bufferFragment);
+				drawer.openDrawer(Gravity.LEFT);
+				isDrawerOpen = true;
 
-                //Initialize the nick drawer
-                trans.add(R.id.right_drawer, nickFragment);
-                trans.commit();
-            }
-        } else {
-            if (currentFragment == null) {
-                FragmentTransaction fragmentTransaction = manager.beginTransaction();
-                ConnectingFragment fragment = ConnectingFragment.newInstance();
-                fragmentTransaction.add(R.id.main_content_container, fragment, "connect");
-                fragmentTransaction.commit();
-            }
-        }
-    }
+				//Initialize the nick drawer
+				trans.add(R.id.right_drawer, nickFragment);
+				trans.commit();
+			}
+		} else {
+			if (currentFragment == null) {
+				FragmentTransaction fragmentTransaction = manager.beginTransaction();
+				ConnectingFragment fragment = ConnectingFragment.newInstance();
+				fragmentTransaction.add(R.id.main_content_container, fragment, "connect");
+				fragmentTransaction.commit();
+			}
+		}
+	}
 
-    @Subscribe
-    public void onLatencyChanged(LatencyChangedEvent event) {
-        if (showLag) {
-            if (event.latency > 0) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    setActionBarSubtitle(Helper.formatLatency(event.latency, getResources()));
-                } else {
-                    setTitle(getResources().getString(R.string.app_name) + " - "
-                            + Helper.formatLatency(event.latency, getResources()));
-                }
-            }
-        }
-    }
+	@Subscribe
+	public void onLatencyChanged(LatencyChangedEvent event) {
+		if (showLag) {
+			if (event.latency > 0) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+					setActionBarSubtitle(Helper.formatLatency(event.latency, getResources()));
+				} else {
+					setTitle(getResources().getString(R.string.app_name) + " - "
+					         + Helper.formatLatency(event.latency, getResources()));
+				}
+			}
+		}
+	}
 
-    @Subscribe
-    public void onConnectionChanged(ConnectionChangedEvent event) {
-        if (event.status == Status.Disconnected) {
-            if (event.reason != "") {
-                removeDialog(R.id.DIALOG_CONNECTING);
-                Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
+	@Subscribe
+	public void onConnectionChanged(ConnectionChangedEvent event) {
+		if (event.status == Status.Disconnected) {
+			if (event.reason != "") {
+				removeDialog(R.id.DIALOG_CONNECTING);
+				Toast.makeText(MainActivity.this.getApplicationContext(), event.reason,
+				               Toast.LENGTH_LONG).show();
 
-            }
-            returnToLogin();
-        }
-    }
+			}
+			returnToLogin();
+		}
+	}
 
-    private void returnToLogin() {
-        finish();
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
+	private void returnToLogin() {
+		finish();
+		Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+	}
 
-    @Subscribe
-    public void onBufferOpened(BufferOpenedEvent event) {
-        if (event.bufferId != -1) {
-            openedBuffer = event.bufferId;
-            if (event.switchToBuffer) {
-                drawer.closeDrawers();
-            }
-        }
-    }
+	@Subscribe
+	public void onBufferOpened(BufferOpenedEvent event) {
+		if (event.bufferId != -1) {
+			openedBuffer = event.bufferId;
+			if (event.switchToBuffer) {
+				drawer.closeDrawers();
+			}
+		}
+	}
 
-    @Produce
-    public BufferOpenedEvent produceBufferOpenedEvent() {
-        return new BufferOpenedEvent(openedBuffer);
-    }
+	@Produce
+	public BufferOpenedEvent produceBufferOpenedEvent() {
+		return new BufferOpenedEvent(openedBuffer);
+	}
 
-    @Subscribe
-    public void onBufferRemoved(BufferRemovedEvent event) {
-        if (event.bufferId == openedBuffer) {
-            openedBuffer = -1;
-            BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
-            drawer.closeDrawer(Gravity.RIGHT);
-            drawer.openDrawer(Gravity.LEFT);
-        }
-    }
+	@Subscribe
+	public void onBufferRemoved(BufferRemovedEvent event) {
+		if (event.bufferId == openedBuffer) {
+			openedBuffer = -1;
+			BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
+			drawer.closeDrawer(Gravity.RIGHT);
+			drawer.openDrawer(Gravity.LEFT);
+		}
+	}
 
-    private ServiceConnection focusConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName cn, IBinder service) {
-        }
+	private ServiceConnection focusConnection = new ServiceConnection() {
+		public void onServiceConnected(ComponentName cn, IBinder service) {
+		}
 
-        public void onServiceDisconnected(ComponentName cn) {
-        }
-    };
+		public void onServiceDisconnected(ComponentName cn) {
+		}
+	};
 }

@@ -21,118 +21,120 @@ import javax.net.ssl.X509TrustManager;
  * @author sandsmark
  */
 class CustomTrustManager implements javax.net.ssl.X509TrustManager {
-    /**
-     *
-     */
-    private final CoreConnection coreConnection;
-    /*
-     * The default X509TrustManager returned by SunX509.  We'll delegate
-     * decisions to it, and fall back to the logic in this class if the
-     * default X509TrustManager doesn't trust it.
-     */
-    X509TrustManager defaultTrustManager;
+	/**
+	 *
+	 */
+	private final CoreConnection coreConnection;
+	/*
+	 * The default X509TrustManager returned by SunX509.  We'll delegate
+	 * decisions to it, and fall back to the logic in this class if the
+	 * default X509TrustManager doesn't trust it.
+	 */
+	X509TrustManager defaultTrustManager;
 
-    CustomTrustManager(CoreConnection coreConnection) throws GeneralSecurityException {
-        this.coreConnection = coreConnection;
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        tmf.init(ks);
+	CustomTrustManager(CoreConnection coreConnection) throws GeneralSecurityException {
+		this.coreConnection = coreConnection;
+		KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+		TrustManagerFactory tmf = TrustManagerFactory.getInstance(
+		                                  KeyManagerFactory.getDefaultAlgorithm());
+		tmf.init(ks);
 
-        TrustManager tms[] = tmf.getTrustManagers();
+		TrustManager tms[] = tmf.getTrustManagers();
 
 		/*
-         * Iterate over the returned trustmanagers, look
+		* Iterate over the returned trustmanagers, look
 		 * for an instance of X509TrustManager.  If found,
 		 * use that as our "default" trust manager.
 		 */
-        for (int i = 0; i < tms.length; i++) {
-            if (tms[i] instanceof X509TrustManager) {
-                defaultTrustManager = (X509TrustManager) tms[i];
-                return;
-            }
-        }
+		for (int i = 0; i < tms.length; i++) {
+			if (tms[i] instanceof X509TrustManager) {
+				defaultTrustManager = (X509TrustManager) tms[i];
+				return;
+			}
+		}
 
-        throw new GeneralSecurityException("Couldn't initialize certificate management!");
-    }
+		throw new GeneralSecurityException("Couldn't initialize certificate management!");
+	}
 
-    /*
-     * Delegate to the default trust manager.
-     */
-    public void checkClientTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
-        try {
-            defaultTrustManager.checkClientTrusted(chain, authType);
-        } catch (CertificateException excep) {
-            Log.e(CustomTrustManager.class.getName(), "checkClientTrusted failed", excep);
-        }
-    }
+	/*
+	 * Delegate to the default trust manager.
+	 */
+	public void checkClientTrusted(X509Certificate[] chain, String authType)
+	throws CertificateException {
+		try {
+			defaultTrustManager.checkClientTrusted(chain, authType);
+		} catch (CertificateException excep) {
+			Log.e(CustomTrustManager.class.getName(), "checkClientTrusted failed", excep);
+		}
+	}
 
-    /*
-     * Delegate to the default trust manager.
-     */
-    public void checkServerTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException, NewCertificateException {
-        try {
-            defaultTrustManager.checkServerTrusted(chain, authType);
-        } catch (CertificateException excep) {
+	/*
+	 * Delegate to the default trust manager.
+	 */
+	public void checkServerTrusted(X509Certificate[] chain, String authType)
+	throws CertificateException, NewCertificateException {
+		try {
+			defaultTrustManager.checkServerTrusted(chain, authType);
+		} catch (CertificateException excep) {
 			/* Here we either check the certificate against the last stored one,
 			 * or throw a security exception to let the user know that something is wrong.
 			 */
-            String hashedCert = hash(chain[0].getEncoded());
-            QuasselDbHelper dbHelper = new QuasselDbHelper(coreConnection.service);
-            dbHelper.open();
-            String storedCert = dbHelper.getCertificate(coreConnection.getCoreId());
-            dbHelper.close();
-            if (storedCert != null) {
-                if (!storedCert.equals(hashedCert)) {
-                    throw new CertificateException(hashedCert);
-                }
-            } else {
-                throw new NewCertificateException(hashedCert);
-                //System.out.println("Storing new certificate: " + hashedCert);
-                //preferences.edit().putString("certificate", hashedCert).commit();
-            }
-        }
-    }
+			String hashedCert = hash(chain[0].getEncoded());
+			QuasselDbHelper dbHelper = new QuasselDbHelper(coreConnection.service);
+			dbHelper.open();
+			String storedCert = dbHelper.getCertificate(coreConnection.getCoreId());
+			dbHelper.close();
+			if (storedCert != null) {
+				if (!storedCert.equals(hashedCert)) {
+					throw new CertificateException(hashedCert);
+				}
+			} else {
+				throw new NewCertificateException(hashedCert);
+				//System.out.println("Storing new certificate: " + hashedCert);
+				//preferences.edit().putString("certificate", hashedCert).commit();
+			}
+		}
+	}
 
-    /**
-     * Java sucks.
-     *
-     * @param s The bytes to hash
-     * @return a hash representing the input bytes.
-     */
-    private String hash(byte[] s) {
-        try {
-            MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
-            digest.update(s);
-            byte messageDigest[] = digest.digest();
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++)
-                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
+	/**
+	 * Java sucks.
+	 *
+	 * @param s The bytes to hash
+	 * @return a hash representing the input bytes.
+	 */
+	private String hash(byte[] s) {
+		try {
+			MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
+			digest.update(s);
+			byte messageDigest[] = digest.digest();
+			StringBuffer hexString = new StringBuffer();
+			for (int i = 0; i < messageDigest.length; i++) {
+				hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+			}
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 
 
-    /*
-     * Merely pass this through.
-     */
-    public X509Certificate[] getAcceptedIssuers() {
-        return defaultTrustManager.getAcceptedIssuers();
-    }
+	/*
+	 * Merely pass this through.
+	 */
+	public X509Certificate[] getAcceptedIssuers() {
+		return defaultTrustManager.getAcceptedIssuers();
+	}
 
-    static class NewCertificateException extends CertificateException {
-        private String hashedCert;
+	static class NewCertificateException extends CertificateException {
+		private String hashedCert;
 
-        public NewCertificateException(String hashedCert) {
-            this.hashedCert = hashedCert;
-        }
+		public NewCertificateException(String hashedCert) {
+			this.hashedCert = hashedCert;
+		}
 
-        public String hashedCert() {
-            return this.hashedCert;
-        }
-    }
+		public String hashedCert() {
+			return this.hashedCert;
+		}
+	}
 }

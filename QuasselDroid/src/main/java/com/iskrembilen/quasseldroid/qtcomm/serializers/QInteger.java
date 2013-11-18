@@ -30,15 +30,15 @@ import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeSerializer;
 import java.io.IOException;
 
 public class QInteger implements QMetaTypeSerializer<Integer> {
-    @Override
-    public void serialize(QDataOutputStream stream, Integer data,
-                          DataStreamVersion version) throws IOException {
-        stream.writeInt(data);
-    }
+	@Override
+	public void serialize(QDataOutputStream stream, Integer data,
+	                      DataStreamVersion version) throws IOException {
+		stream.writeInt(data);
+	}
 
-    @Override
-    public Integer unserialize(QDataInputStream stream, DataStreamVersion version)
-            throws IOException {
-        return stream.readInt();
-    }
+	@Override
+	public Integer unserialize(QDataInputStream stream, DataStreamVersion version)
+	throws IOException {
+		return stream.readInt();
+	}
 }

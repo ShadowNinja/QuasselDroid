@@ -30,18 +30,18 @@ import java.io.IOException;
 
 public class Void implements QMetaTypeSerializer<java.lang.Void> {
 
-    @Override
-    public void serialize(QDataOutputStream stream, java.lang.Void data,
-                          DataStreamVersion version) throws IOException {
+	@Override
+	public void serialize(QDataOutputStream stream, java.lang.Void data,
+	                      DataStreamVersion version) throws IOException {
 //		stream.write(0);
 
-    }
+	}
 
-    @Override
-    public java.lang.Void unserialize(QDataInputStream stream,
-                                      DataStreamVersion version) throws IOException {
-        return null;
-    }
+	@Override
+	public java.lang.Void unserialize(QDataInputStream stream,
+	                                  DataStreamVersion version) throws IOException {
+		return null;
+	}
 
 
 }

@@ -30,17 +30,17 @@ import java.io.IOException;
 
 public class QChar implements QMetaTypeSerializer<Character> {
 
-    @Override
-    public void serialize(QDataOutputStream stream, Character data,
-                          DataStreamVersion version) throws IOException {
-        stream.writeUInt(data.charValue(), 16);
+	@Override
+	public void serialize(QDataOutputStream stream, Character data,
+	                      DataStreamVersion version) throws IOException {
+		stream.writeUInt(data.charValue(), 16);
 
-    }
+	}
 
-    @Override
-    public Character unserialize(QDataInputStream stream,
-                                 DataStreamVersion version) throws IOException {
-        return Character.valueOf((char) stream.readUInt(16));
-    }
+	@Override
+	public Character unserialize(QDataInputStream stream,
+	                             DataStreamVersion version) throws IOException {
+		return Character.valueOf((char) stream.readUInt(16));
+	}
 
 }

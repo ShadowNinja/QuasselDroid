@@ -34,43 +34,44 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
-    String keyType;
-    String valueType;
-    QMetaTypeSerializer<T> keySerializer;
-    QMetaTypeSerializer<V> valueSerializer;
+	String keyType;
+	String valueType;
+	QMetaTypeSerializer<T> keySerializer;
+	QMetaTypeSerializer<V> valueSerializer;
 
-    public QMap(String element1Type, String element2Type) {
-        this.keyType = element1Type;
-        this.valueType = element2Type;
-    }
+	public QMap(String element1Type, String element2Type) {
+		this.keyType = element1Type;
+		this.valueType = element2Type;
+	}
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void serialize(QDataOutputStream stream,
-                          Map<T, V> data, DataStreamVersion version)
-            throws IOException {
-        stream.writeUInt(data.size(), 32);
-        keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
-        valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
+	@SuppressWarnings("unchecked")
+	@Override
+	public void serialize(QDataOutputStream stream,
+	                      Map<T, V> data, DataStreamVersion version)
+	throws IOException {
+		stream.writeUInt(data.size(), 32);
+		keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
+		valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
 
-        for (Map.Entry<T, V> element : data.entrySet()) {
-            keySerializer.serialize(stream, element.getKey(), version);
-            valueSerializer.serialize(stream, element.getValue(), version);
-        }
-    }
+		for (Map.Entry<T, V> element : data.entrySet()) {
+			keySerializer.serialize(stream, element.getKey(), version);
+			valueSerializer.serialize(stream, element.getValue(), version);
+		}
+	}
 
-    @Override
-    public Map<T, V> unserialize(QDataInputStream stream,
-                                 DataStreamVersion version) throws IOException, EmptyQVariantException {
+	@Override
+	public Map<T, V> unserialize(QDataInputStream stream,
+	                             DataStreamVersion version) throws IOException, EmptyQVariantException {
 
-        Map map = new HashMap<String, T>();
-        keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
-        valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
-        int len = (int) stream.readUInt(32);
-        for (int i = 0; i < len; i++) {
-            map.put((T) keySerializer.unserialize(stream, version), (V) valueSerializer.unserialize(stream, version));
-        }
-        return map;
-    }
+		Map map = new HashMap<String, T>();
+		keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
+		valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
+		int len = (int) stream.readUInt(32);
+		for (int i = 0; i < len; i++) {
+			map.put((T) keySerializer.unserialize(stream, version),
+			        (V) valueSerializer.unserialize(stream, version));
+		}
+		return map;
+	}
 
 }

@@ -14,72 +14,72 @@ import com.iskrembilen.quasseldroid.R;
 
 public class InFocus extends Service {
 
-    protected Intent inFocusIntent;
-    protected SharedPreferences pref;
-    protected SharedPreferences.Editor prefEditor;
+	protected Intent inFocusIntent;
+	protected SharedPreferences pref;
+	protected SharedPreferences.Editor prefEditor;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+	@Override
+	public void onCreate() {
+		super.onCreate();
 
-        inFocusIntent = new Intent(this.getString(R.string.has_focus) + "_changed");
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
-        prefEditor = pref.edit();
+		inFocusIntent = new Intent(this.getString(R.string.has_focus) + "_changed");
+		pref = PreferenceManager.getDefaultSharedPreferences(this);
+		prefEditor = pref.edit();
 
-        onFocus();
+		onFocus();
 
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        registerReceiver(screenStateChanged, intentFilter);
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+		intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+		registerReceiver(screenStateChanged, intentFilter);
 
-    }
+	}
 
-    private void onFocus() {
-        prefEditor.putBoolean(this.getString(R.string.has_focus), true);
-        prefEditor.commit();
+	private void onFocus() {
+		prefEditor.putBoolean(this.getString(R.string.has_focus), true);
+		prefEditor.commit();
 
-        inFocusIntent.putExtra(this.getString(R.string.has_focus), true);
-        sendBroadcast(inFocusIntent);
-    }
+		inFocusIntent.putExtra(this.getString(R.string.has_focus), true);
+		sendBroadcast(inFocusIntent);
+	}
 
-    private void onUnfocus() {
-        prefEditor.putBoolean(this.getString(R.string.has_focus), false);
-        prefEditor.commit();
+	private void onUnfocus() {
+		prefEditor.putBoolean(this.getString(R.string.has_focus), false);
+		prefEditor.commit();
 
-        inFocusIntent.putExtra(this.getString(R.string.has_focus), false);
-        sendBroadcast(inFocusIntent);
-    }
+		inFocusIntent.putExtra(this.getString(R.string.has_focus), false);
+		sendBroadcast(inFocusIntent);
+	}
 
-    private BroadcastReceiver screenStateChanged = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                onFocus();
-            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                onUnfocus();
-            }
-        }
-    };
+	private BroadcastReceiver screenStateChanged = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+				onFocus();
+			} else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+				onUnfocus();
+			}
+		}
+	};
 
-    @Override
-    public boolean onUnbind(Intent intent) {
-        onUnfocus();
-        unregisterReceiver(screenStateChanged);
-        return false;
-    }
+	@Override
+	public boolean onUnbind(Intent intent) {
+		onUnfocus();
+		unregisterReceiver(screenStateChanged);
+		return false;
+	}
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
+	@Override
+	public IBinder onBind(Intent intent) {
+		return binder;
+	}
 
-    public class LocalBinder extends Binder {
-        InFocus getService() {
-            return InFocus.this;
-        }
-    }
+	public class LocalBinder extends Binder {
+		InFocus getService() {
+			return InFocus.this;
+		}
+	}
 
-    private final IBinder binder = new LocalBinder();
+	private final IBinder binder = new LocalBinder();
 
 }
