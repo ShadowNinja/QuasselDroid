@@ -35,16 +35,17 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
     CustomTrustManager(CoreConnection coreConnection) throws GeneralSecurityException {
         this.coreConnection = coreConnection;
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(
+                                      KeyManagerFactory.getDefaultAlgorithm());
         tmf.init(ks);
 
         TrustManager tms[] = tmf.getTrustManagers();
 
-		/*
+        /*
          * Iterate over the returned trustmanagers, look
-		 * for an instance of X509TrustManager.  If found,
-		 * use that as our "default" trust manager.
-		 */
+         * for an instance of X509TrustManager.  If found,
+         * use that as our "default" trust manager.
+         */
         for (int i = 0; i < tms.length; i++) {
             if (tms[i] instanceof X509TrustManager) {
                 defaultTrustManager = (X509TrustManager) tms[i];
@@ -59,7 +60,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
      * Delegate to the default trust manager.
      */
     public void checkClientTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
+    throws CertificateException {
         try {
             defaultTrustManager.checkClientTrusted(chain, authType);
         } catch (CertificateException excep) {
@@ -71,13 +72,13 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
      * Delegate to the default trust manager.
      */
     public void checkServerTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException, NewCertificateException {
+    throws CertificateException, NewCertificateException {
         try {
             defaultTrustManager.checkServerTrusted(chain, authType);
         } catch (CertificateException excep) {
-			/* Here we either check the certificate against the last stored one,
-			 * or throw a security exception to let the user know that something is wrong.
-			 */
+            /* Here we either check the certificate against the last stored one,
+             * or throw a security exception to let the user know that something is wrong.
+             */
             String hashedCert = hash(chain[0].getEncoded());
             QuasselDbHelper dbHelper = new QuasselDbHelper(coreConnection.service);
             dbHelper.open();
@@ -107,8 +108,9 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
             digest.update(s);
             byte messageDigest[] = digest.digest();
             StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++)
+            for (int i = 0; i < messageDigest.length; i++) {
                 hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+            }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

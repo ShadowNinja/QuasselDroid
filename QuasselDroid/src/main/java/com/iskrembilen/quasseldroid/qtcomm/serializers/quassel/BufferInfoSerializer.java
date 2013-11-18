@@ -41,7 +41,8 @@ public class BufferInfoSerializer implements QMetaTypeSerializer<BufferInfo> {
         stream.writeInt(data.networkId);
         stream.writeShort(data.type.getValue());
         stream.writeUInt(data.groupId, 32);
-        QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().serialize(stream, data.name, version);
+        QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().serialize(
+            stream, data.name, version);
     }
 
     @Override
@@ -52,7 +53,9 @@ public class BufferInfoSerializer implements QMetaTypeSerializer<BufferInfo> {
         ret.networkId = stream.readInt();
         ret.type = BufferInfo.Type.getType(stream.readShort());
         ret.groupId = stream.readUInt(32);
-        ret.name = (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version);
+        ret.name = (String)
+                   QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(
+                       stream, version);
         return ret;
     }
 }

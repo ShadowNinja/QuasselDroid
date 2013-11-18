@@ -163,18 +163,25 @@ public class CoreConnService extends Service {
         incomingHandler = new IncomingHandler();
         notificationManager = new QuasseldroidNotificationManager(this);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-        preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), false);
+        preferenceParseColors = preferences.getBoolean(getString(
+                                    R.string.preference_colored_text), false);
+        preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock),
+                                false);
         preferenceListener = new OnSharedPreferenceChangeListener() {
 
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals(getString(R.string.preference_colored_text))) {
-                    preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
+                    preferenceParseColors = preferences.getBoolean(getString(
+                                                R.string.preference_colored_text), false);
                 } else if (key.equals(getString(R.string.preference_wake_lock))) {
-                    preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
-                    if (!preferenceUseWakeLock) releaseWakeLockIfExists();
-                    else if (preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
+                    preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock),
+                                            true);
+                    if (!preferenceUseWakeLock) {
+                        releaseWakeLockIfExists();
+                    } else if (preferenceUseWakeLock && isConnected()) {
+                        acquireWakeLockIfEnabled();
+                    }
                 }
             }
         };
@@ -223,14 +230,14 @@ public class CoreConnService extends Service {
         String password = connectData.getString("password");
         Boolean ssl = connectData.getBoolean("ssl");
         Log.i(TAG, "Connecting to core: " + address + ":" + port
-                + " with username " + username);
+              + " with username " + username);
         networks = NetworkCollection.getInstance();
         networks.clear();
 
         acquireWakeLockIfEnabled();
 
         coreConn = new CoreConnection(id, address, port, username, password, ssl,
-                this);
+                                      this);
     }
 
     private void acquireWakeLockIfEnabled() {
@@ -241,7 +248,8 @@ public class CoreConnService extends Service {
             Log.i(TAG, "WakeLock acquired");
 
             WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "quasseldroid wifilock");
+            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL,
+                                                  "quasseldroid wifilock");
             wifiLock.acquire();
             Log.i(TAG, "WifiLock acquired");
         }
@@ -278,8 +286,9 @@ public class CoreConnService extends Service {
 
     public Buffer getBuffer(int bufferId, Observer obs) {
         Buffer buffer = networks.getBufferById(bufferId);
-        if (obs != null && buffer != null)
+        if (obs != null && buffer != null) {
             buffer.addObserver(obs);
+        }
         return buffer;
     }
 
@@ -289,8 +298,9 @@ public class CoreConnService extends Service {
 
     public void disconnectFromCore() {
         releaseWakeLockIfExists();
-        if (coreConn != null)
+        if (coreConn != null) {
             coreConn.closeConnection();
+        }
         coreConn = null;
         notificationManager = null;
         stopSelf();
@@ -320,172 +330,180 @@ public class CoreConnService extends Service {
             String bufferName;
             switch (msg.what) {
 
-                case R.id.NEW_BACKLOGITEM_TO_SERVICE:
+            case R.id.NEW_BACKLOGITEM_TO_SERVICE:
+                /**
+                 * New message on one buffer so update that buffer with the new
+                 * message
+                 */
+                message = (IrcMessage) msg.obj;
+                buffer = networks.getBufferById(message.bufferInfo.id);
+
+                if (buffer == null) {
+                    Log.e(TAG, "A message buffer is null:" + message);
+                    return;
+                }
+
+                if (!buffer.hasMessage(message)) {
                     /**
-                     * New message on one buffer so update that buffer with the new
-                     * message
+                     * Check if we are highlighted in the message, TODO: Add
+                     * support for custom highlight masks
                      */
-                    message = (IrcMessage) msg.obj;
-                    buffer = networks.getBufferById(message.bufferInfo.id);
-
-                    if (buffer == null) {
-                        Log.e(TAG, "A message buffer is null:" + message);
-                        return;
-                    }
-
-                    if (!buffer.hasMessage(message)) {
-                        /**
-                         * Check if we are highlighted in the message, TODO: Add
-                         * support for custom highlight masks
-                         */
-                        MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
-                        if (preferenceParseColors)
-                            MessageUtil.parseStyleCodes(CoreConnService.this, message);
-                        buffer.addBacklogMessage(message);
-                    } else {
-                        Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
-                    }
-                    break;
-                case R.id.NEW_MESSAGE_TO_SERVICE:
-                    /**
-                     * New message on one buffer so update that buffer with the new
-                     * message
-                     */
-                    message = (IrcMessage) msg.obj;
-                    buffer = networks.getBufferById(message.bufferInfo.id);
-                    if (buffer == null) {
-                        Log.e(TAG, "A messages buffer is null: " + message);
-                        return;
-                    }
-
-                    if (!buffer.hasMessage(message)) {
-                        /**
-                         * Check if we are highlighted in the message, TODO: Add
-                         * support for custom highlight masks
-                         */
-                        MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
+                    MessageUtil.checkMessageForHighlight(networks.getNetworkById(
+                            buffer.getInfo().networkId).getNick(), buffer, message);
+                    if (preferenceParseColors) {
                         MessageUtil.parseStyleCodes(CoreConnService.this, message);
-                        if ((message.isHighlighted() && !buffer.isDisplayed()) || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer && ((message.flags & Flag.Self.getValue()) == 0))) {
-                            notificationManager.notifyHighlight(buffer.getInfo().id);
+                    }
+                    buffer.addBacklogMessage(message);
+                } else {
+                    Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
+                }
+                break;
+            case R.id.NEW_MESSAGE_TO_SERVICE:
+                /**
+                 * New message on one buffer so update that buffer with the new
+                 * message
+                 */
+                message = (IrcMessage) msg.obj;
+                buffer = networks.getBufferById(message.bufferInfo.id);
+                if (buffer == null) {
+                    Log.e(TAG, "A messages buffer is null: " + message);
+                    return;
+                }
 
-                        }
-                        buffer.addMessage(message);
+                if (!buffer.hasMessage(message)) {
+                    /**
+                     * Check if we are highlighted in the message, TODO: Add
+                     * support for custom highlight masks
+                     */
+                    MessageUtil.checkMessageForHighlight(networks.getNetworkById(
+                            buffer.getInfo().networkId).getNick(), buffer, message);
+                    MessageUtil.parseStyleCodes(CoreConnService.this, message);
+                    if ((message.isHighlighted() && !buffer.isDisplayed())
+                            || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer
+                                && ((message.flags & Flag.Self.getValue()) == 0))) {
+                        notificationManager.notifyHighlight(buffer.getInfo().id);
 
-                        if (buffer.isTemporarilyHidden() && (message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Notice || message.type == IrcMessage.Type.Action)) {
-                            unhideTempHiddenBuffer(buffer.getInfo().id);
-                        }
+                    }
+                    buffer.addMessage(message);
+
+                    if (buffer.isTemporarilyHidden() && (message.type == IrcMessage.Type.Plain
+                                                         || message.type == IrcMessage.Type.Notice || message.type == IrcMessage.Type.Action)) {
+                        unhideTempHiddenBuffer(buffer.getInfo().id);
+                    }
+                } else {
+                    Log.e(TAG, "Getting message buffer already have " + buffer.toString());
+                }
+                break;
+
+            case R.id.NEW_BUFFER_TO_SERVICE:
+                /**
+                 * New buffer received, so update out channel holder with the
+                 * new buffer
+                 */
+                networks.addBuffer((Buffer) msg.obj);
+                checkSwitchingTo((Buffer) msg.obj);
+                break;
+            case R.id.ADD_MULTIPLE_BUFFERS:
+                /**
+                 * Complete list of buffers received
+                 */
+                for (Buffer tmp : (Collection<Buffer>) msg.obj) {
+                    networks.addBuffer(tmp);
+                }
+                break;
+            case R.id.ADD_NETWORK:
+                networks.addNetwork((Network) msg.obj);
+                break;
+            case R.id.NETWORK_REMOVED:
+                BusProvider.getInstance().post(new BufferRemovedEvent(networks.getNetworkById(
+                                                   msg.arg1).getStatusBuffer().getInfo().id));
+                networks.removeNetwork(msg.arg1);
+                break;
+            case R.id.SET_CONNECTION_STATE:
+                if (networks.getNetworkById(msg.arg1) != null) {
+                    networks.getNetworkById(msg.arg1).setConnectionState((ConnectionState) msg.obj);
+                }
+                break;
+            case R.id.SET_STATUS_BUFFER:
+                networks.getNetworkById(msg.arg1).setStatusBuffer((Buffer) msg.obj);
+            case R.id.SET_LAST_SEEN_TO_SERVICE:
+                /**
+                 * Setting last seen message id in a buffer
+                 */
+                buffer = networks.getBufferById(msg.arg1);
+                if (buffer != null) {
+                    buffer.setLastSeenMessage(msg.arg2);
+                    //if(buffer.hasUnseenHighlight()) {FIXME
+                    notificationManager.notifyHighlightsRead(buffer.getInfo().id);
+                    //}
+                } else {
+                    Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
+                }
+                break;
+            case R.id.SET_MARKERLINE_TO_SERVICE:
+                /**
+                 * Setting marker line message id in a buffer
+                 */
+                buffer = networks.getBufferById(msg.arg1);
+                if (buffer != null) {
+                    buffer.setMarkerLineMessage(msg.arg2);
+                } else {
+                    Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
+                }
+                break;
+
+
+            case R.id.CONNECTING:
+                /**
+                 * CoreConn has connected to a core
+                 */
+                notificationManager.notifyConnecting();
+                BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connecting));
+                break;
+
+
+            case R.id.LOST_CONNECTION:
+                /**
+                 * Lost connection with core, update notification
+                 */
+                if (coreConn != null) {
+                    if (msg.obj != null) { // Have description of what is wrong,
+                        // used only for login atm
+                        BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected,
+                                                       (String) msg.obj));
                     } else {
-                        Log.e(TAG, "Getting message buffer already have " + buffer.toString());
+                        BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
                     }
-                    break;
-
-                case R.id.NEW_BUFFER_TO_SERVICE:
-                    /**
-                     * New buffer received, so update out channel holder with the
-                     * new buffer
-                     */
-                    networks.addBuffer((Buffer) msg.obj);
-                    checkSwitchingTo((Buffer) msg.obj);
-                    break;
-                case R.id.ADD_MULTIPLE_BUFFERS:
-                    /**
-                     * Complete list of buffers received
-                     */
-                    for (Buffer tmp : (Collection<Buffer>) msg.obj) {
-                        networks.addBuffer(tmp);
-                    }
-                    break;
-                case R.id.ADD_NETWORK:
-                    networks.addNetwork((Network) msg.obj);
-                    break;
-                case R.id.NETWORK_REMOVED:
-                    BusProvider.getInstance().post(new BufferRemovedEvent(networks.getNetworkById(msg.arg1).getStatusBuffer().getInfo().id));
-                    networks.removeNetwork(msg.arg1);
-                    break;
-                case R.id.SET_CONNECTION_STATE:
-                    if (networks.getNetworkById(msg.arg1) != null) {
-                        networks.getNetworkById(msg.arg1).setConnectionState((ConnectionState) msg.obj);
-                    }
-                    break;
-                case R.id.SET_STATUS_BUFFER:
-                    networks.getNetworkById(msg.arg1).setStatusBuffer((Buffer) msg.obj);
-                case R.id.SET_LAST_SEEN_TO_SERVICE:
-                    /**
-                     * Setting last seen message id in a buffer
-                     */
-                    buffer = networks.getBufferById(msg.arg1);
-                    if (buffer != null) {
-                        buffer.setLastSeenMessage(msg.arg2);
-                        //if(buffer.hasUnseenHighlight()) {FIXME
-                        notificationManager.notifyHighlightsRead(buffer.getInfo().id);
-                        //}
-                    } else {
-                        Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
-                    }
-                    break;
-                case R.id.SET_MARKERLINE_TO_SERVICE:
-                    /**
-                     * Setting marker line message id in a buffer
-                     */
-                    buffer = networks.getBufferById(msg.arg1);
-                    if (buffer != null) {
-                        buffer.setMarkerLineMessage(msg.arg2);
-                    } else {
-                        Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
-                    }
-                    break;
-
-
-                case R.id.CONNECTING:
-                    /**
-                     * CoreConn has connected to a core
-                     */
-                    notificationManager.notifyConnecting();
-                    BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connecting));
-                    break;
-
-
-                case R.id.LOST_CONNECTION:
-                    /**
-                     * Lost connection with core, update notification
-                     */
-                    if (coreConn != null) {
-                        if (msg.obj != null) { // Have description of what is wrong,
-                            // used only for login atm
-                            BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, (String) msg.obj));
-                        } else {
-                            BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
-                        }
-                        notificationManager.notifyDisconnected();
-                    }
-                    disconnectFromCore();
-                    break;
-                case R.id.NEW_USER_ADDED:
-                    /**
-                     * New IrcUser added
-                     */
-                    user = (IrcUser) msg.obj;
-                    networks.getNetworkById(msg.arg1).onUserJoined(user);
-                    break;
-                case R.id.NEW_USER_INFO:
-                    bundle = (Bundle) msg.obj;
-                    user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    if (user != null) {
-                        user.away = bundle.getBoolean("away");
-                        user.awayMessage = bundle.getString("awayMessage");
-                        user.ircOperator = bundle.getString("ircOperator");
-                        user.channels = (ArrayList<String>) bundle.getSerializable("channels");
-                        user.notifyObservers();
-                    } else {
-                        Log.e(TAG, "User not found for new user info");
-                        //TODO: why is it not found...
-                    }
-                    break;
-                case R.id.SET_BUFFER_ORDER:
-                    /**
-                     * Buffer order changed so set the new one
-                     */
-                    //---- start debug stuff
+                    notificationManager.notifyDisconnected();
+                }
+                disconnectFromCore();
+                break;
+            case R.id.NEW_USER_ADDED:
+                /**
+                 * New IrcUser added
+                 */
+                user = (IrcUser) msg.obj;
+                networks.getNetworkById(msg.arg1).onUserJoined(user);
+                break;
+            case R.id.NEW_USER_INFO:
+                bundle = (Bundle) msg.obj;
+                user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+                if (user != null) {
+                    user.away = bundle.getBoolean("away");
+                    user.awayMessage = bundle.getString("awayMessage");
+                    user.ircOperator = bundle.getString("ircOperator");
+                    user.channels = (ArrayList<String>) bundle.getSerializable("channels");
+                    user.notifyObservers();
+                } else {
+                    Log.e(TAG, "User not found for new user info");
+                    //TODO: why is it not found...
+                }
+                break;
+            case R.id.SET_BUFFER_ORDER:
+                /**
+                 * Buffer order changed so set the new one
+                 */
+                //---- start debug stuff
 //				ArrayList<Integer> a = (((Bundle)msg.obj).getIntegerArrayList("keys"));
 //				ArrayList<Integer> b = ((Bundle)msg.obj).getIntegerArrayList("buffers");
 //				ArrayList<Integer> c = new ArrayList<Integer>();
@@ -498,210 +516,216 @@ public class CoreConnService extends Service {
 //				Collections.sort(a);
 //				Collections.sort(b);
 //				Collections.sort(c);
-                    //---- end debug stuff
+                //---- end debug stuff
 
-                    if (networks == null)
-                        throw new RuntimeException("Networks are null when setting buffer order");
-                    if (networks.getBufferById(msg.arg1) == null)
-                        return;
-                    //throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
-                    networks.getBufferById(msg.arg1).setOrder(msg.arg2);
-                    break;
+                if (networks == null) {
+                    throw new RuntimeException("Networks are null when setting buffer order");
+                }
+                if (networks.getBufferById(msg.arg1) == null) {
+                    return;
+                }
+                //throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
+                networks.getBufferById(msg.arg1).setOrder(msg.arg2);
+                break;
 
-                case R.id.SET_BUFFER_TEMP_HIDDEN:
-                    /**
-                     * Buffer has been marked as temporary hidden, update buffer
-                     */
-                    networks.getBufferById(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
-                    if (!(Boolean) msg.obj) {
-                        checkSwitchingTo(networks.getBufferById(msg.arg1));
-                    }
-                    break;
+            case R.id.SET_BUFFER_TEMP_HIDDEN:
+                /**
+                 * Buffer has been marked as temporary hidden, update buffer
+                 */
+                networks.getBufferById(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
+                if (!(Boolean) msg.obj) {
+                    checkSwitchingTo(networks.getBufferById(msg.arg1));
+                }
+                break;
 
-                case R.id.SET_BUFFER_PERM_HIDDEN:
-                    /**
-                     * Buffer has been marked as permanently hidden, update buffer
-                     */
-                    networks.getBufferById(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
-                    if (!(Boolean) msg.obj) {
-                        checkSwitchingTo(networks.getBufferById(msg.arg1));
-                    }
-                    break;
+            case R.id.SET_BUFFER_PERM_HIDDEN:
+                /**
+                 * Buffer has been marked as permanently hidden, update buffer
+                 */
+                networks.getBufferById(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
+                if (!(Boolean) msg.obj) {
+                    checkSwitchingTo(networks.getBufferById(msg.arg1));
+                }
+                break;
 
-                case R.id.INVALID_CERTIFICATE:
-                    /**
-                     * Received a mismatching certificate
-                     */
-                    BusProvider.getInstance().post(new CertificateChangedEvent((String) msg.obj));
-                    break;
-                case R.id.NEW_CERTIFICATE:
-                    /**
-                     * Received a new, unseen certificate
-                     */
-                    BusProvider.getInstance().post(new NewCertificateEvent((String) msg.obj));
-                    break;
-                case R.id.SET_BUFFER_ACTIVE:
-                    /**
-                     * Set buffer as active or parted
-                     */
-                    networks.getBufferById(msg.arg1).setActive((Boolean) msg.obj);
-                    break;
-                case R.id.UNSUPPORTED_PROTOCOL:
-                    /**
-                     * The protocol version of the core is not supported so tell user it is to old
-                     */
-                    BusProvider.getInstance().post(new UnsupportedProtocolEvent());
-                    break;
-                case R.id.INIT_PROGRESS:
-                    initDone = false;
-                    initReason = (String) msg.obj;
-                    BusProvider.getInstance().post(new InitProgressEvent(false, initReason));
-                    break;
-                case R.id.INIT_DONE:
-                    /**
-                     * CoreConn has connected to a core
-                     */
-                    notificationManager.notifyConnected();
-                    initDone = true;
-                    BusProvider.getInstance().post(new InitProgressEvent(true, ""));
-                    BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
-                    break;
-                case R.id.USER_PARTED:
-                    bundle = (Bundle) msg.obj;
-                    if (networks.getNetworkById(msg.arg1) == null) { // sure why not
-                        Log.w(TAG, "Unable to find network for user that parted");
+            case R.id.INVALID_CERTIFICATE:
+                /**
+                 * Received a mismatching certificate
+                 */
+                BusProvider.getInstance().post(new CertificateChangedEvent((String) msg.obj));
+                break;
+            case R.id.NEW_CERTIFICATE:
+                /**
+                 * Received a new, unseen certificate
+                 */
+                BusProvider.getInstance().post(new NewCertificateEvent((String) msg.obj));
+                break;
+            case R.id.SET_BUFFER_ACTIVE:
+                /**
+                 * Set buffer as active or parted
+                 */
+                networks.getBufferById(msg.arg1).setActive((Boolean) msg.obj);
+                break;
+            case R.id.UNSUPPORTED_PROTOCOL:
+                /**
+                 * The protocol version of the core is not supported so tell user it is to old
+                 */
+                BusProvider.getInstance().post(new UnsupportedProtocolEvent());
+                break;
+            case R.id.INIT_PROGRESS:
+                initDone = false;
+                initReason = (String) msg.obj;
+                BusProvider.getInstance().post(new InitProgressEvent(false, initReason));
+                break;
+            case R.id.INIT_DONE:
+                /**
+                 * CoreConn has connected to a core
+                 */
+                notificationManager.notifyConnected();
+                initDone = true;
+                BusProvider.getInstance().post(new InitProgressEvent(true, ""));
+                BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
+                break;
+            case R.id.USER_PARTED:
+                bundle = (Bundle) msg.obj;
+                if (networks.getNetworkById(msg.arg1) == null) { // sure why not
+                    Log.w(TAG, "Unable to find network for user that parted");
+                    return;
+                }
+                networks.getNetworkById(msg.arg1).onUserParted(bundle.getString("nick"),
+                        bundle.getString("buffer"));
+                break;
+            case R.id.USER_QUIT:
+                if (networks.getNetworkById(msg.arg1) == null) {
+                    System.err.println("Unable to find buffer for message");
+                    return;
+                }
+                networks.getNetworkById(msg.arg1).onUserQuit((String) msg.obj);
+                break;
+            case R.id.USER_JOINED:
+                if (networks.getNetworkById(msg.arg1) == null) {
+                    System.err.println("Unable to find buffer for message");
+                    return;
+                }
+                bundle = (Bundle) msg.obj;
+                user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+                String modes = (String) bundle.get("mode");
+                bufferName = (String) bundle.get("buffername");
+                for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    if (buf.getInfo().name.equalsIgnoreCase(bufferName)) {
+                        buf.getUsers().addUser(user, modes);
                         return;
                     }
-                    networks.getNetworkById(msg.arg1).onUserParted(bundle.getString("nick"), bundle.getString("buffer"));
-                    break;
-                case R.id.USER_QUIT:
-                    if (networks.getNetworkById(msg.arg1) == null) {
-                        System.err.println("Unable to find buffer for message");
-                        return;
+                }
+                //Did not find buffer in the network, something is wrong
+                Log.w(TAG, "joinIrcUser: Did not find buffer with name " + bufferName);
+            case R.id.USER_CHANGEDNICK:
+                if (networks.getNetworkById(msg.arg1) == null) {
+                    Log.e(TAG, "Could not find network with id " + msg.arg1 + " for changing a user nick");
+                    return;
+                }
+                bundle = (Bundle) msg.obj;
+                user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
+                if (user == null) {
+                    Log.e(TAG, "Unable to find user " + bundle.getString("oldNick") + " for changing nick");
+                    return;
+                }
+                user.changeNick(bundle.getString("newNick"));
+                break;
+            case R.id.USER_ADD_MODE:
+                if (networks.getNetworkById(msg.arg1) == null) {
+                    System.err.println("Unable to find buffer for message");
+                    return;
+                }
+                bundle = (Bundle) msg.obj;
+                bufferName = bundle.getString("channel");
+                user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+                for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    if (buf.getInfo().name.equals(bufferName)) {
+                        buf.getUsers().addModeToUser(user, bundle.getString("mode"));
+                        break;
                     }
-                    networks.getNetworkById(msg.arg1).onUserQuit((String) msg.obj);
-                    break;
-                case R.id.USER_JOINED:
-                    if (networks.getNetworkById(msg.arg1) == null) {
-                        System.err.println("Unable to find buffer for message");
-                        return;
+                }
+                break;
+            case R.id.USER_REMOVE_MODE:
+                if (networks.getNetworkById(msg.arg1) == null) {
+                    System.err.println("Unable to find buffer for message");
+                    return;
+                }
+                bundle = (Bundle) msg.obj;
+                bufferName = bundle.getString("channel");
+                user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+                for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    if (buf.getInfo().name.equals(bufferName)) {
+                        buf.getUsers().removeModeFromUser(user, bundle.getString("mode"));
+                        break;
                     }
-                    bundle = (Bundle) msg.obj;
-                    user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    String modes = (String) bundle.get("mode");
-                    bufferName = (String) bundle.get("buffername");
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
-                        if (buf.getInfo().name.equalsIgnoreCase(bufferName)) {
-                            buf.getUsers().addUser(user, modes);
-                            return;
-                        }
+                }
+                break;
+            case R.id.CHANNEL_TOPIC_CHANGED:
+                networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).setTopic((
+                            String) msg.obj);
+                break;
+            case R.id.SET_CONNECTED:
+                networks.getNetworkById(msg.arg1).setConnected((Boolean) msg.obj);
+                break;
+            case R.id.SET_MY_NICK:
+                networks.getNetworkById(msg.arg1).setNick((String) msg.obj);
+                break;
+            case R.id.REMOVE_BUFFER:
+                BusProvider.getInstance().post(new BufferRemovedEvent(msg.arg2));
+                if (networks.getNetworkById(msg.arg1) != null) {
+                    networks.getNetworkById(msg.arg1).removeBuffer(msg.arg2);
+                }
+                break;
+            case R.id.SET_CORE_LATENCY:
+                latency = msg.arg1;
+                BusProvider.getInstance().post(new LatencyChangedEvent(latency));
+                break;
+            case R.id.SET_NETWORK_LATENCY:
+                networks.getNetworkById(msg.arg1).setLatency(msg.arg2);
+                break;
+            case R.id.RENAME_BUFFER:
+                networks.getBufferById(msg.arg1).setName((String) msg.obj);
+                break;
+            case R.id.SET_USER_SERVER:
+                bundle = (Bundle) msg.obj;
+                Network networkServer = networks.getNetworkById(msg.arg1);
+                if (networkServer != null) {
+                    IrcUser userServer = networkServer.getUserByNick(bundle.getString("nick"));
+                    if (userServer != null) {
+                        userServer.server = bundle.getString("server");
                     }
-                    //Did not find buffer in the network, something is wrong
-                    Log.w(TAG, "joinIrcUser: Did not find buffer with name " + bufferName);
-                case R.id.USER_CHANGEDNICK:
-                    if (networks.getNetworkById(msg.arg1) == null) {
-                        Log.e(TAG, "Could not find network with id " + msg.arg1 + " for changing a user nick");
-                        return;
+                }
+                break;
+            case R.id.SET_USER_REALNAME:
+                bundle = (Bundle) msg.obj;
+                Network networkRealName = networks.getNetworkById(msg.arg1);
+                if (networkRealName != null) {
+                    IrcUser userRealName = networkRealName.getUserByNick(bundle.getString("nick"));
+                    if (userRealName != null) {
+                        userRealName.realName = bundle.getString("realname");
                     }
-                    bundle = (Bundle) msg.obj;
-                    user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
-                    if (user == null) {
-                        Log.e(TAG, "Unable to find user " + bundle.getString("oldNick") + " for changing nick");
-                        return;
+                }
+                break;
+            case R.id.SET_USER_AWAY:
+                bundle = (Bundle) msg.obj;
+                Network networkAway = networks.getNetworkById(msg.arg1);
+                if (networkAway != null) {
+                    IrcUser userAway = networkAway.getUserByNick(bundle.getString("nick"));
+                    if (userAway != null) {
+                        userAway.away = bundle.getBoolean("away");
                     }
-                    user.changeNick(bundle.getString("newNick"));
-                    break;
-                case R.id.USER_ADD_MODE:
-                    if (networks.getNetworkById(msg.arg1) == null) {
-                        System.err.println("Unable to find buffer for message");
-                        return;
-                    }
-                    bundle = (Bundle) msg.obj;
-                    bufferName = bundle.getString("channel");
-                    user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
-                        if (buf.getInfo().name.equals(bufferName)) {
-                            buf.getUsers().addModeToUser(user, bundle.getString("mode"));
-                            break;
-                        }
-                    }
-                    break;
-                case R.id.USER_REMOVE_MODE:
-                    if (networks.getNetworkById(msg.arg1) == null) {
-                        System.err.println("Unable to find buffer for message");
-                        return;
-                    }
-                    bundle = (Bundle) msg.obj;
-                    bufferName = bundle.getString("channel");
-                    user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
-                        if (buf.getInfo().name.equals(bufferName)) {
-                            buf.getUsers().removeModeFromUser(user, bundle.getString("mode"));
-                            break;
-                        }
-                    }
-                    break;
-                case R.id.CHANNEL_TOPIC_CHANGED:
-                    networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).setTopic((String) msg.obj);
-                    break;
-                case R.id.SET_CONNECTED:
-                    networks.getNetworkById(msg.arg1).setConnected((Boolean) msg.obj);
-                    break;
-                case R.id.SET_MY_NICK:
-                    networks.getNetworkById(msg.arg1).setNick((String) msg.obj);
-                    break;
-                case R.id.REMOVE_BUFFER:
-                    BusProvider.getInstance().post(new BufferRemovedEvent(msg.arg2));
-                    if (networks.getNetworkById(msg.arg1) != null) {
-                        networks.getNetworkById(msg.arg1).removeBuffer(msg.arg2);
-                    }
-                    break;
-                case R.id.SET_CORE_LATENCY:
-                    latency = msg.arg1;
-                    BusProvider.getInstance().post(new LatencyChangedEvent(latency));
-                    break;
-                case R.id.SET_NETWORK_LATENCY:
-                    networks.getNetworkById(msg.arg1).setLatency(msg.arg2);
-                    break;
-                case R.id.RENAME_BUFFER:
-                    networks.getBufferById(msg.arg1).setName((String) msg.obj);
-                    break;
-                case R.id.SET_USER_SERVER:
-                    bundle = (Bundle) msg.obj;
-                    Network networkServer = networks.getNetworkById(msg.arg1);
-                    if (networkServer != null) {
-                        IrcUser userServer = networkServer.getUserByNick(bundle.getString("nick"));
-                        if (userServer != null) {
-                            userServer.server = bundle.getString("server");
-                        }
-                    }
-                    break;
-                case R.id.SET_USER_REALNAME:
-                    bundle = (Bundle) msg.obj;
-                    Network networkRealName = networks.getNetworkById(msg.arg1);
-                    if (networkRealName != null) {
-                        IrcUser userRealName = networkRealName.getUserByNick(bundle.getString("nick"));
-                        if (userRealName != null) {
-                            userRealName.realName = bundle.getString("realname");
-                        }
-                    }
-                    break;
-                case R.id.SET_USER_AWAY:
-                    bundle = (Bundle) msg.obj;
-                    Network networkAway = networks.getNetworkById(msg.arg1);
-                    if (networkAway != null) {
-                        IrcUser userAway = networkAway.getUserByNick(bundle.getString("nick"));
-                        if (userAway != null) {
-                            userAway.away = bundle.getBoolean("away");
-                        }
-                    }
-                    break;
+                }
+                break;
             }
         }
     }
 
     public boolean isInitComplete() {
-        if (coreConn == null) return false;
+        if (coreConn == null) {
+            return false;
+        }
         return coreConn.isInitComplete();
     }
 
@@ -710,7 +734,8 @@ public class CoreConnService extends Service {
     }
 
     private void checkSwitchingTo(Buffer buffer) {
-        if (networkToSwitchTo == buffer.getInfo().networkId && bufferNameToSwitchTo.equals(buffer.getInfo().name)) {
+        if (networkToSwitchTo == buffer.getInfo().networkId
+                && bufferNameToSwitchTo.equals(buffer.getInfo().name)) {
             BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
         }
         networkToSwitchTo = -1;
@@ -719,10 +744,11 @@ public class CoreConnService extends Service {
 
     @Produce
     public ConnectionChangedEvent produceConnectionStatus() {
-        if (isConnected())
+        if (isConnected()) {
             return new ConnectionChangedEvent(Status.Connected);
-        else
+        } else {
             return new ConnectionChangedEvent(Status.Disconnected);
+        }
     }
 
     @Produce
@@ -746,9 +772,11 @@ public class CoreConnService extends Service {
         }
         if (networksStatusBufferId != -1) {
             sendMessage(networksStatusBufferId, "/join " + event.channelName);
-            Toast.makeText(getApplicationContext(), "Joining channel " + event.channelName, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Joining channel " + event.channelName,
+                           Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(getApplicationContext(), "Error joining channel", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Error joining channel",
+                           Toast.LENGTH_LONG).show();
         }
     }
 
@@ -811,10 +839,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void onFilterMessages(FilterMessagesEvent event) {
-        if (event.filtered)
+        if (event.filtered) {
             networks.getBufferById(event.bufferId).addFilterType(event.filterType);
-        else
+        } else {
             networks.getBufferById(event.bufferId).removeFilterType(event.filterType);
+        }
     }
 
     @Subscribe

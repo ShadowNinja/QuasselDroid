@@ -48,7 +48,8 @@ public class PreferenceView extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.layout.preferences);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                                            getApplicationContext());
         listener = new OnSharedPreferenceChangeListener() {
 
             @Override

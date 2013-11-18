@@ -235,11 +235,15 @@ public class Network extends Observable implements Observer, Comparable<Network>
     public void setConnected(Boolean connected) {
         if (connected) {
             setOpen(true);
-            if (statusBuffer != null) statusBuffer.setActive(true);
+            if (statusBuffer != null) {
+                statusBuffer.setActive(true);
+            }
 
         } else {
             setOpen(false);
-            if (statusBuffer != null) statusBuffer.setActive(false);
+            if (statusBuffer != null) {
+                statusBuffer.setActive(false);
+            }
             for (Buffer buffer : buffers.getRawBufferList()) {
                 buffer.setActive(false);
             }

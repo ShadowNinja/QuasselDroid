@@ -48,10 +48,11 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
     @SuppressWarnings("unchecked")
     @Override
     public List<T> unserialize(QDataInputStream stream, DataStreamVersion version)
-            throws IOException, EmptyQVariantException {
+    throws IOException, EmptyQVariantException {
         List<T> list = makeList();
         int len = (int) stream.readUInt(32);
-        serializer = (QMetaTypeSerializer<T>) QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer();
+        serializer = (QMetaTypeSerializer<T>) QMetaTypeRegistry.instance().getTypeForName(
+                         elementType).getSerializer();
 
         for (int i = 0; i < len; i++) {
             list.add((T) serializer.unserialize(stream, version));
@@ -64,7 +65,8 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
     public void serialize(QDataOutputStream stream, List<T> data,
                           DataStreamVersion version) throws IOException {
         stream.writeUInt(data.size(), 32);
-        serializer = (QMetaTypeSerializer<T>) QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer();
+        serializer = (QMetaTypeSerializer<T>) QMetaTypeRegistry.instance().getTypeForName(
+                         elementType).getSerializer();
 
         for (T element : data) {
             serializer.serialize(stream, element, version);

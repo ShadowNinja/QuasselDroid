@@ -10,13 +10,20 @@ import com.iskrembilen.quasseldroid.R;
 public class ThemeUtil {
 
     public static int theme;
-    public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
-    public static int chatPlainColor, chatNoticeColor, chatActionColor, chatNickColor, chatModeColor, chatJoinColor, chatPartColor, chatQuitColor, chatKickColor, chatKillColor, chatServerColor, chatInfoColor, chatErrorColor, chatDayChangeColor, chatTopicColor, chatNetsplitQuitColor, chatNetsplitJoinColor, chatHighlightColor, chatSelfColor, chatTimestampColor;
+    public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor,
+           bufferActivityColor, bufferReadColor;
+    public static int chatPlainColor, chatNoticeColor, chatActionColor, chatNickColor,
+           chatModeColor, chatJoinColor, chatPartColor, chatQuitColor, chatKickColor, chatKillColor,
+           chatServerColor, chatInfoColor, chatErrorColor, chatDayChangeColor, chatTopicColor,
+           chatNetsplitQuitColor, chatNetsplitJoinColor, chatHighlightColor, chatSelfColor,
+           chatTimestampColor;
     public static int chatPlainResource;
 
     public static void initTheme(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
-        String themeName = preferences.getString(context.getString(R.string.preference_theme), "");
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
+                                            context.getApplicationContext());
+        String themeName = preferences.getString(context.getString(R.string.preference_theme),
+                           "");
         setTheme(context, themeName);
     }
 

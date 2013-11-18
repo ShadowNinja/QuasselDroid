@@ -52,7 +52,8 @@ public class NickListFragment extends SherlockFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.nick_list_fragment_layout, container, false);
         list = (ExpandableListView) root.findViewById(R.id.userList);
         return root;
@@ -114,15 +115,16 @@ public class NickListFragment extends SherlockFragment {
                 return;
             }
             switch ((Integer) data) {
-                case R.id.BUFFERUPDATE_USERSCHANGED:
-                    notifyDataSetChanged();
-                    break;
+            case R.id.BUFFERUPDATE_USERSCHANGED:
+                notifyDataSetChanged();
+                break;
             }
         }
 
         public void stopObserving() {
-            if (users != null)
+            if (users != null) {
                 users.deleteObserver(this);
+            }
 
         }
 
@@ -172,7 +174,9 @@ public class NickListFragment extends SherlockFragment {
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            if (this.users == null) return 0;
+            if (this.users == null) {
+                return 0;
+            }
             return getGroup(groupPosition).second.size();
         }
 
@@ -191,7 +195,9 @@ public class NickListFragment extends SherlockFragment {
 
         @Override
         public int getGroupCount() {
-            if (users == null) return 0;
+            if (users == null) {
+                return 0;
+            }
             return IrcMode.values().length;
         }
 
@@ -210,8 +216,10 @@ public class NickListFragment extends SherlockFragment {
                 holder = new ViewHolderGroup();
                 holder.nameView = (TextView) convertView.findViewById(R.id.nicklist_group_name_view);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.nicklist_group_image_view);
-                holder.expanderView = (ImageView) convertView.findViewById(R.id.nicklist_expander_image_view);
-                holder.groupHolderView = (LinearLayout) convertView.findViewById(R.id.nicklist_holder_view);
+                holder.expanderView = (ImageView) convertView.findViewById(
+                                          R.id.nicklist_expander_image_view);
+                holder.groupHolderView = (LinearLayout) convertView.findViewById(
+                                             R.id.nicklist_holder_view);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderGroup) convertView.getTag();
@@ -226,7 +234,8 @@ public class NickListFragment extends SherlockFragment {
 
             } else {
                 if (group.second.size() > 1) {
-                    holder.nameView.setText(group.second.size() + " " + group.first.modeName + group.first.pluralization);
+                    holder.nameView.setText(group.second.size() + " " + group.first.modeName +
+                                            group.first.pluralization);
                 } else {
                     holder.nameView.setText(group.second.size() + " " + group.first.modeName);
                 }
@@ -235,7 +244,8 @@ public class NickListFragment extends SherlockFragment {
                 holder.expanderView.setVisibility(View.VISIBLE);
                 holder.imageView.setImageResource(group.first.iconResource);
                 holder.groupHolderView.setPadding(5, 2, 2, 2);
-                holder.expanderView.getDrawable().setState(list.isGroupExpanded(groupPosition) ? EXPANDED_STATE : NOT_EXPANDED_STATE);
+                holder.expanderView.getDrawable().setState(list.isGroupExpanded(
+                            groupPosition) ? EXPANDED_STATE : NOT_EXPANDED_STATE);
             }
             return convertView;
         }

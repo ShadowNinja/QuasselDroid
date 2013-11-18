@@ -18,8 +18,9 @@ public class NetworkCollection extends Observable implements Observer {
     }
 
     static public NetworkCollection getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new NetworkCollection();
+        }
 
         return instance;
     }
@@ -39,8 +40,10 @@ public class NetworkCollection extends Observable implements Observer {
 
     public Buffer getBufferById(int bufferId) {
         for (Network network : networkList) {
-            if (network.getStatusBuffer() != null && network.getStatusBuffer().getInfo().id == bufferId)
+            if (network.getStatusBuffer() != null
+                    && network.getStatusBuffer().getInfo().id == bufferId) {
                 return network.getStatusBuffer();
+            }
             if (network.getBuffers().hasBuffer(bufferId)) {
                 return network.getBuffers().getBuffer(bufferId);
             }
@@ -60,7 +63,8 @@ public class NetworkCollection extends Observable implements Observer {
                 return;
             }
         }
-        throw new RuntimeException("Buffer + " + buffer.getInfo().name + " has no valide network id " + id);
+        throw new RuntimeException("Buffer + " + buffer.getInfo().name +
+                                   " has no valide network id " + id);
     }
 
     public List<Network> getNetworkList() {

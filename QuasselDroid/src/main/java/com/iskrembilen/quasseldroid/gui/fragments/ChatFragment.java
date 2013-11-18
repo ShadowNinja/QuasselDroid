@@ -137,11 +137,13 @@ public class ChatFragment extends SherlockFragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
-                        ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER))) {
+                        ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+                         || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER))) {
                     String inputText = inputField.getText().toString();
 
                     if (!"".equals(inputText)) {
-                        BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, inputText));
+                        BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id,
+                                                       inputText));
                         InputHistoryHelper.addHistoryEntry(inputText);
                         inputField.setText("");
                         InputHistoryHelper.tempStoreCurrentEntry("");
@@ -188,11 +190,14 @@ public class ChatFragment extends SherlockFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_hide_events:
-                if (adapter.buffer == null)
-                    Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
-                else showHideEventsDialog();
-                return true;
+        case R.id.menu_hide_events:
+            if (adapter.buffer == null) {
+                Toast.makeText(getSherlockActivity(), getString(R.string.not_available),
+                               Toast.LENGTH_SHORT).show();
+            } else {
+                showHideEventsDialog();
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -200,7 +205,8 @@ public class ChatFragment extends SherlockFragment {
     @Override
     public void onStart() {
         super.onStart();
-        dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
+        dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(
+                R.string.preference_dynamic_backlog), "10"));
         autoCompleteButton.setEnabled(false);
         inputField.setEnabled(false);
         BusProvider.getInstance().register(this);
@@ -217,7 +223,9 @@ public class ChatFragment extends SherlockFragment {
     public void onStop() {
         Log.d(TAG, "Stopping fragment");
         super.onStop();
-        if (Quasseldroid.connected && getUserVisibleHint()) updateRead();
+        if (Quasseldroid.connected && getUserVisibleHint()) {
+            updateRead();
+        }
         adapter.clearBuffer();
         BusProvider.getInstance().unregister(this);
         setUserVisibleHint(false);
@@ -260,15 +268,19 @@ public class ChatFragment extends SherlockFragment {
                 adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
             }
             if (adapter.buffer.getUnfilteredSize() != 0) {
-                BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(), ChannelAction.MARK_AS_READ));
-                BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize() - 1).messageId, MessageAction.LAST_SEEN));
+                BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(),
+                                               ChannelAction.MARK_AS_READ));
+                BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(),
+                                               adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize() -
+                                                       1).messageId, MessageAction.LAST_SEEN));
             }
 
         }
     }
 
     private void updateMarkerLine() {
-        BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getLastSeenMessage(), MessageAction.MARKER_LINE));
+        BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(),
+                                       adapter.buffer.getLastSeenMessage(), MessageAction.MARKER_LINE));
     }
 
     public void setBuffer(int bufferId) {
@@ -286,7 +298,8 @@ public class ChatFragment extends SherlockFragment {
                 autoCompleteButton.setEnabled(true);
                 inputField.setEnabled(true);
                 buffer.setDisplayed(true);
-                BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
+                BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id,
+                                               ChannelAction.HIGHLIGHTS_READ));
 
                 //Move list to correect position
                 if (adapter.buffer.getTopMessageShown() == 0) {
@@ -337,7 +350,9 @@ public class ChatFragment extends SherlockFragment {
 
         @Override
         public int getCount() {
-            if (this.buffer == null) return 0;
+            if (this.buffer == null) {
+                return 0;
+            }
             return buffer.getSize();
         }
 
@@ -364,14 +379,19 @@ public class ChatFragment extends SherlockFragment {
                 holder.nickView = (TextView) convertView.findViewById(R.id.backlog_nick_view);
                 holder.msgView = (TextView) convertView.findViewById(R.id.backlog_msg_view);
                 holder.separatorView = (TextView) convertView.findViewById(R.id.backlog_list_separator);
-                holder.item_layout = (LinearLayout) convertView.findViewById(R.id.backlog_item_linearlayout);
+                holder.item_layout = (LinearLayout) convertView.findViewById(
+                                         R.id.backlog_item_linearlayout);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
 
             //Set separator line here
-            if (position != (getCount() - 1) && (buffer.getMarkerLineMessage() == getItem(position).messageId || (buffer.isMarkerLineFiltered() && getItem(position).messageId < buffer.getMarkerLineMessage() && getItem(position + 1).messageId > buffer.getMarkerLineMessage()))) {
+            if (position != (getCount() - 1)
+                    && (buffer.getMarkerLineMessage() == getItem(position).messageId
+                        || (buffer.isMarkerLineFiltered()
+                            && getItem(position).messageId < buffer.getMarkerLineMessage()
+                            && getItem(position + 1).messageId > buffer.getMarkerLineMessage()))) {
                 holder.separatorView.getLayoutParams().height = 1;
             } else {
                 holder.separatorView.getLayoutParams().height = 0;
@@ -382,112 +402,113 @@ public class ChatFragment extends SherlockFragment {
             holder.timeView.setText(entry.getTime());
 
             switch (entry.type) {
-                case Action:
-                    holder.nickView.setText("-*-");
-                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatActionColor);
-                    holder.msgView.setText(entry.getNick() + " " + entry.content);
-                    break;
-                case Error:
-                    holder.nickView.setText("*");
-                    holder.msgView.setTextColor(ThemeUtil.chatErrorColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatErrorColor);
-                    holder.msgView.setText(entry.content);
-                    break;
-                case Server:
-                case Info:
-                    holder.nickView.setText("*");
-                    holder.msgView.setTextColor(ThemeUtil.chatServerColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatServerColor);
-                    holder.msgView.setText(entry.content);
-                    break;
-                case Topic:
-                    holder.nickView.setText("*");
-                    holder.msgView.setTextColor(ThemeUtil.chatTopicColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatTopicColor);
-                    holder.msgView.setText(entry.content);
-                    break;
-                case Notice:
-                    holder.nickView.setText("[" + entry.getNick() + "]");
-                    holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNoticeColor);
-                    holder.msgView.setText(entry.content);
-                    break;
-                case Join:
-                    holder.nickView.setText("-->");
-                    holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.chatJoinColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatJoinColor);
-                    break;
-                case Part:
-                    holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
-                    holder.msgView.setTextColor(ThemeUtil.chatPartColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatPartColor);
-                    break;
-                case Quit:
-                    holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
-                    holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatQuitColor);
-                    break;
-                case Kill:
-                    holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " was killed (" + entry.content + ")");
-                    holder.msgView.setTextColor(ThemeUtil.chatKillColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatKillColor);
-                    break;
-                case Kick:
-                    holder.nickView.setText("<-*");
-                    int nickEnd = entry.content.toString().indexOf(" ");
-                    String nick = entry.content.toString().substring(0, nickEnd);
-                    String reason = entry.content.toString().substring(nickEnd + 1);
-                    holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + " (" + reason + ")");
-                    holder.msgView.setTextColor(ThemeUtil.chatKickColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatKickColor);
-                    break;
-                case Mode:
-                    holder.nickView.setText("***");
-                    holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
-                    holder.msgView.setTextColor(ThemeUtil.chatModeColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatModeColor);
-                    break;
-                case Nick:
-                    holder.nickView.setText("<->");
-                    holder.msgView.setText(entry.getNick() + " is now known as " + entry.content.toString());
-                    holder.msgView.setTextColor(ThemeUtil.chatNickColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNickColor);
-                    break;
-                case NetsplitJoin:
-                    holder.nickView.setText("=>");
-                    holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
-                    holder.msgView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
-                    break;
-                case NetsplitQuit:
-                    holder.nickView.setText("<=");
-                    holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
-                    holder.msgView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
-                    break;
-                case DayChange:
-                    holder.nickView.setText("-");
-                    holder.msgView.setText("{Day changed to " + entry.content.toString() + "}");
-                    holder.msgView.setTextColor(ThemeUtil.chatDayChangeColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatDayChangeColor);
-                case Plain:
-                default:
-                    if (entry.isSelf()) {
-                        holder.nickView.setTextColor(ThemeUtil.chatSelfColor);
-                    } else {
-                        holder.nickView.setTextColor(entry.senderColor);
-                    }
-                    holder.msgView.setTextColor(ThemeUtil.chatPlainColor);
-                    holder.msgView.setTypeface(Typeface.DEFAULT);
+            case Action:
+                holder.nickView.setText("-*-");
+                holder.msgView.setTextColor(ThemeUtil.chatActionColor);
+                holder.nickView.setTextColor(ThemeUtil.chatActionColor);
+                holder.msgView.setText(entry.getNick() + " " + entry.content);
+                break;
+            case Error:
+                holder.nickView.setText("*");
+                holder.msgView.setTextColor(ThemeUtil.chatErrorColor);
+                holder.nickView.setTextColor(ThemeUtil.chatErrorColor);
+                holder.msgView.setText(entry.content);
+                break;
+            case Server:
+            case Info:
+                holder.nickView.setText("*");
+                holder.msgView.setTextColor(ThemeUtil.chatServerColor);
+                holder.nickView.setTextColor(ThemeUtil.chatServerColor);
+                holder.msgView.setText(entry.content);
+                break;
+            case Topic:
+                holder.nickView.setText("*");
+                holder.msgView.setTextColor(ThemeUtil.chatTopicColor);
+                holder.nickView.setTextColor(ThemeUtil.chatTopicColor);
+                holder.msgView.setText(entry.content);
+                break;
+            case Notice:
+                holder.nickView.setText("[" + entry.getNick() + "]");
+                holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
+                holder.nickView.setTextColor(ThemeUtil.chatNoticeColor);
+                holder.msgView.setText(entry.content);
+                break;
+            case Join:
+                holder.nickView.setText("-->");
+                holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
+                holder.msgView.setTextColor(ThemeUtil.chatJoinColor);
+                holder.nickView.setTextColor(ThemeUtil.chatJoinColor);
+                break;
+            case Part:
+                holder.nickView.setText("<--");
+                holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
+                holder.msgView.setTextColor(ThemeUtil.chatPartColor);
+                holder.nickView.setTextColor(ThemeUtil.chatPartColor);
+                break;
+            case Quit:
+                holder.nickView.setText("<--");
+                holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
+                holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
+                holder.nickView.setTextColor(ThemeUtil.chatQuitColor);
+                break;
+            case Kill:
+                holder.nickView.setText("<--");
+                holder.msgView.setText(entry.getNick() + " was killed (" + entry.content + ")");
+                holder.msgView.setTextColor(ThemeUtil.chatKillColor);
+                holder.nickView.setTextColor(ThemeUtil.chatKillColor);
+                break;
+            case Kick:
+                holder.nickView.setText("<-*");
+                int nickEnd = entry.content.toString().indexOf(" ");
+                String nick = entry.content.toString().substring(0, nickEnd);
+                String reason = entry.content.toString().substring(nickEnd + 1);
+                holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " +
+                                       entry.bufferInfo.name + " (" + reason + ")");
+                holder.msgView.setTextColor(ThemeUtil.chatKickColor);
+                holder.nickView.setTextColor(ThemeUtil.chatKickColor);
+                break;
+            case Mode:
+                holder.nickView.setText("***");
+                holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
+                holder.msgView.setTextColor(ThemeUtil.chatModeColor);
+                holder.nickView.setTextColor(ThemeUtil.chatModeColor);
+                break;
+            case Nick:
+                holder.nickView.setText("<->");
+                holder.msgView.setText(entry.getNick() + " is now known as " + entry.content.toString());
+                holder.msgView.setTextColor(ThemeUtil.chatNickColor);
+                holder.nickView.setTextColor(ThemeUtil.chatNickColor);
+                break;
+            case NetsplitJoin:
+                holder.nickView.setText("=>");
+                holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
+                holder.msgView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+                holder.nickView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+                break;
+            case NetsplitQuit:
+                holder.nickView.setText("<=");
+                holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
+                holder.msgView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
+                holder.nickView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
+                break;
+            case DayChange:
+                holder.nickView.setText("-");
+                holder.msgView.setText("{Day changed to " + entry.content.toString() + "}");
+                holder.msgView.setTextColor(ThemeUtil.chatDayChangeColor);
+                holder.nickView.setTextColor(ThemeUtil.chatDayChangeColor);
+            case Plain:
+            default:
+                if (entry.isSelf()) {
+                    holder.nickView.setTextColor(ThemeUtil.chatSelfColor);
+                } else {
+                    holder.nickView.setTextColor(entry.senderColor);
+                }
+                holder.msgView.setTextColor(ThemeUtil.chatPlainColor);
+                holder.msgView.setTypeface(Typeface.DEFAULT);
 
-                    holder.nickView.setText("<" + entry.getNick() + ">");
-                    holder.msgView.setText(entry.content);
-                    break;
+                holder.nickView.setText("<" + entry.getNick() + ">");
+                holder.msgView.setText(entry.content);
+                break;
             }
             if (entry.isHighlighted()) {
                 holder.item_layout.setBackgroundColor(ThemeUtil.chatHighlightColor);
@@ -505,19 +526,19 @@ public class ChatFragment extends SherlockFragment {
                 return;
             }
             switch ((Integer) data) {
-                case R.id.BUFFERUPDATE_NEWMESSAGE:
-                    notifyDataSetChanged();
-                    if (getUserVisibleHint()) {
-                        updateRead();
-                    }
-                    break;
-                case R.id.BUFFERUPDATE_BACKLOG:
-                    int topId = getListTopMessageId();
-                    notifyDataSetChanged();
-                    setListTopMessage(topId);
-                    break;
-                default:
-                    notifyDataSetChanged();
+            case R.id.BUFFERUPDATE_NEWMESSAGE:
+                notifyDataSetChanged();
+                if (getUserVisibleHint()) {
+                    updateRead();
+                }
+                break;
+            case R.id.BUFFERUPDATE_BACKLOG:
+                int topId = getListTopMessageId();
+                notifyDataSetChanged();
+                setListTopMessage(topId);
+                break;
+            default:
+                notifyDataSetChanged();
             }
 
         }
@@ -562,7 +583,8 @@ public class ChatFragment extends SherlockFragment {
 
         public void getMoreBacklog() {
             adapter.buffer.setBacklogPending(dynamicBacklogAmout);
-            BusProvider.getInstance().post(new GetBacklogEvent(adapter.getBufferId(), dynamicBacklogAmout));
+            BusProvider.getInstance().post(new GetBacklogEvent(adapter.getBufferId(),
+                                           dynamicBacklogAmout));
         }
 
         public void removeFilter(Type type) {
@@ -601,9 +623,11 @@ public class ChatFragment extends SherlockFragment {
         }
 
         @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                             int totalItemCount) {
             //			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
-            if (adapter.buffer != null && !adapter.buffer.hasPendingBacklog() && (firstVisibleItem <= visibleThreshold)) {
+            if (adapter.buffer != null && !adapter.buffer.hasPendingBacklog()
+                    && (firstVisibleItem <= visibleThreshold)) {
                 adapter.getMoreBacklog();
             }
         }

@@ -73,7 +73,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class BufferFragment extends SherlockFragment implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener {
+public class BufferFragment extends SherlockFragment implements OnGroupExpandListener,
+    OnChildClickListener, OnGroupCollapseListener {
 
     private static final String TAG = BufferFragment.class.getSimpleName();
 
@@ -119,7 +120,8 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                 }
             }
         };
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+        preferences.registerOnSharedPreferenceChangeListener(
+            sharedPreferenceChangeListener); //To avoid GC issues
     }
 
     @Override
@@ -162,16 +164,16 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.context_menu_connect:
-                        BufferHelper.connectNetwork(actionModeData.id);
-                        mode.finish();
-                        return true;
-                    case R.id.context_menu_disconnect:
-                        BufferHelper.disconnectNetwork(actionModeData.id);
-                        mode.finish();
-                        return true;
-                    default:
-                        return false;
+                case R.id.context_menu_connect:
+                    BufferHelper.connectNetwork(actionModeData.id);
+                    mode.finish();
+                    return true;
+                case R.id.context_menu_disconnect:
+                    BufferHelper.disconnectNetwork(actionModeData.id);
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
                 }
             }
 
@@ -200,28 +202,28 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.context_menu_join:
-                        BufferHelper.joinChannel(actionModeData.id, bufferListAdapter.networks);
-                        mode.finish();
-                        return true;
-                    case R.id.context_menu_part:
-                        BufferHelper.partChannel(actionModeData.id, bufferListAdapter.networks);
-                        mode.finish();
-                        return true;
-                    case R.id.context_menu_delete:
-                        BufferHelper.showDeleteConfirmDialog(getSherlockActivity(), actionModeData.id);
-                        mode.finish();
-                        return true;
-                    case R.id.context_menu_hide_temp:
-                        BufferHelper.tempHideChannel(actionModeData.id);
-                        mode.finish();
-                        return true;
-                    case R.id.context_menu_hide_perm:
-                        BufferHelper.permHideChannel(actionModeData.id);
-                        mode.finish();
-                        return true;
-                    default:
-                        return false;
+                case R.id.context_menu_join:
+                    BufferHelper.joinChannel(actionModeData.id, bufferListAdapter.networks);
+                    mode.finish();
+                    return true;
+                case R.id.context_menu_part:
+                    BufferHelper.partChannel(actionModeData.id, bufferListAdapter.networks);
+                    mode.finish();
+                    return true;
+                case R.id.context_menu_delete:
+                    BufferHelper.showDeleteConfirmDialog(getSherlockActivity(), actionModeData.id);
+                    mode.finish();
+                    return true;
+                case R.id.context_menu_hide_temp:
+                    BufferHelper.tempHideChannel(actionModeData.id);
+                    mode.finish();
+                    return true;
+                case R.id.context_menu_hide_perm:
+                    BufferHelper.permHideChannel(actionModeData.id);
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
                 }
             }
 
@@ -242,40 +244,52 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                 int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
                 int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
 
-                if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                if (ExpandableListView.getPackedPositionType(packedPosition) ==
+                        ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
                     Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
-                    actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackBuffer);
+                    actionModeData.actionMode = getSherlockActivity().startActionMode(
+                                                    actionModeData.actionModeCallbackBuffer);
                     actionModeData.id = buffer.getInfo().id;
                     actionModeData.listItem = view;
                     if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(
+                            true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(
+                            true);
                     } else if (buffer.isActive()) {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(
+                            true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(
+                            true);
                     } else {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(
+                            true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(
+                            true);
                     }
-                } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                } else if (ExpandableListView.getPackedPositionType(packedPosition) ==
+                           ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
                     Network network = bufferListAdapter.getGroup(groupPosition);
-                    actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackNetwork);
+                    actionModeData.actionMode = getSherlockActivity().startActionMode(
+                                                    actionModeData.actionModeCallbackNetwork);
                     actionModeData.id = network.getId();
                     actionModeData.listItem = view;
                     if (network.isConnected()) {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(
+                            true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(false);
                     } else {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(
+                            false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(true);
                     }
                 }
@@ -326,11 +340,14 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_join_channel:
-                if (bufferListAdapter.networks == null)
-                    Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
-                else showJoinChannelDialog();
-                return true;
+        case R.id.menu_join_channel:
+            if (bufferListAdapter.networks == null) {
+                Toast.makeText(getSherlockActivity(), getString(R.string.not_available),
+                               Toast.LENGTH_SHORT).show();
+            } else {
+                showJoinChannelDialog();
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -356,7 +373,8 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
     }
 
     @Override
-    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
+                                int childPosition, long id) {
         openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
         return true;
     }
@@ -380,14 +398,19 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
     public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
-        private Bitmap channelActiveBitmap, channelInactiveBitmap, userAwayBitmap, userOfflineBitmap, userBitmap;
+        private Bitmap channelActiveBitmap, channelInactiveBitmap, userAwayBitmap,
+                userOfflineBitmap, userBitmap;
 
         public BufferListAdapter(Context context) {
             inflater = getLayoutInflater(null);
-            channelActiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_active);
-            channelInactiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_inactive);
-            userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_offline);
-            userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
+            channelActiveBitmap = BitmapFactory.decodeResource(context.getResources(),
+                                  R.drawable.irc_channel_active);
+            channelInactiveBitmap = BitmapFactory.decodeResource(context.getResources(),
+                                    R.drawable.irc_channel_inactive);
+            userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(),
+                                R.drawable.im_user_offline);
+            userAwayBitmap = BitmapFactory.decodeResource(context.getResources(),
+                             R.drawable.im_user_away);
             userBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user);
 
 
@@ -395,14 +418,18 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
         public void setNetworks(NetworkCollection networks) {
             this.networks = networks;
-            if (networks == null)
+            if (networks == null) {
                 return;
+            }
             networks.addObserver(this);
             notifyDataSetChanged();
             if (bufferListAdapter != null) {
                 for (int group = 0; group < getGroupCount(); group++) {
-                    if (getGroup(group).isOpen()) bufferList.expandGroup(group);
-                    else bufferList.collapseGroup(group);
+                    if (getGroup(group).isOpen()) {
+                        bufferList.expandGroup(group);
+                    } else {
+                        bufferList.collapseGroup(group);
+                    }
                 }
                 bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
             }
@@ -417,8 +444,11 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
         public void update(Observable observable, Object data) {
             notifyDataSetChanged();
             for (int group = 0; group < getGroupCount(); group++) {
-                if (getGroup(group).isOpen()) bufferList.expandGroup(group);
-                else bufferList.collapseGroup(group);
+                if (getGroup(group).isOpen()) {
+                    bufferList.expandGroup(group);
+                } else {
+                    bufferList.collapseGroup(group);
+                }
             }
         }
 
@@ -433,51 +463,58 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
         }
 
         @Override
-        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+        public View getChildView(int groupPosition, int childPosition, boolean isLastChild,
+                                 View convertView, ViewGroup parent) {
             ViewHolderChild holder = null;
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.buffer_child_item, null);
                 holder = new ViewHolderChild();
                 holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
                 holder.bufferImage = (ImageView) convertView.findViewById(R.id.buffer_list_item_image);
-                holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), "" + holder.bufferView.getTextSize())));
+                holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP,
+                                              Float.parseFloat(preferences.getString(getString(
+                                                      R.string.preference_fontsize_channel_list), "" + holder.bufferView.getTextSize())));
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             Buffer entry = getChild(groupPosition, childPosition);
             switch (entry.getInfo().type) {
-                case StatusBuffer:
-                case ChannelBuffer:
-                    holder.bufferView.setText(entry.getInfo().name);
-                    if (entry.isActive()) holder.bufferImage.setImageBitmap(channelActiveBitmap);
-                    else holder.bufferImage.setImageBitmap(channelInactiveBitmap);
-                    break;
-                case QueryBuffer:
-                    String nick = entry.getInfo().name;
-                    if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        holder.bufferImage.setImageBitmap(userOfflineBitmap);
-                        if (entry.isActive()) {
-                            entry.setActive(false);
-                        }
-                    } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        holder.bufferImage.setImageBitmap(userAwayBitmap);
-                        if (!entry.isActive()) {
-                            entry.setActive(true);
-                        }
-                    } else {
-                        holder.bufferImage.setImageBitmap(userBitmap);
-                        if (!entry.isActive()) {
-                            entry.setActive(true);
-                        }
+            case StatusBuffer:
+            case ChannelBuffer:
+                holder.bufferView.setText(entry.getInfo().name);
+                if (entry.isActive()) {
+                    holder.bufferImage.setImageBitmap(channelActiveBitmap);
+                } else {
+                    holder.bufferImage.setImageBitmap(channelInactiveBitmap);
+                }
+                break;
+            case QueryBuffer:
+                String nick = entry.getInfo().name;
+                if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
+                    holder.bufferImage.setImageBitmap(userOfflineBitmap);
+                    if (entry.isActive()) {
+                        entry.setActive(false);
                     }
+                } else if (bufferListAdapter.networks.getNetworkById(
+                               entry.getInfo().networkId).getUserByNick(nick).away) {
+                    holder.bufferImage.setImageBitmap(userAwayBitmap);
+                    if (!entry.isActive()) {
+                        entry.setActive(true);
+                    }
+                } else {
+                    holder.bufferImage.setImageBitmap(userBitmap);
+                    if (!entry.isActive()) {
+                        entry.setActive(true);
+                    }
+                }
 
-                    holder.bufferView.setText(nick);
+                holder.bufferView.setText(nick);
 
-                    break;
-                case GroupBuffer:
-                case InvalidBuffer:
-                    holder.bufferView.setText("XXXX " + entry.getInfo().name);
+                break;
+            case GroupBuffer:
+            case InvalidBuffer:
+                holder.bufferView.setText("XXXX " + entry.getInfo().name);
             }
 
             BufferUtils.setBufferViewStatus(getSherlockActivity(), entry, holder.bufferView);
@@ -513,13 +550,16 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
         }
 
         @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
+                                 ViewGroup parent) {
             ViewHolderGroup holder = null;
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.buffer_group_item, null);
                 holder = new ViewHolderGroup();
                 holder.statusView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
-                holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), "20")));
+                holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP,
+                                              Float.parseFloat(preferences.getString(getString(
+                                                      R.string.preference_fontsize_channel_list), "20")));
                 holder.statusView.setOnClickListener(new OnClickListener() {
 
                     @Override
@@ -531,7 +571,8 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                         }
                     }
                 });
-                holder.statusView.setOnLongClickListener(null); //Apparently need this so long click propagates to parent
+                holder.statusView.setOnLongClickListener(
+                    null); //Apparently need this so long click propagates to parent
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderGroup) convertView.getTag();
@@ -539,8 +580,10 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
             Network entry = getGroup(groupPosition);
             holder.networkId = entry.getId();
             holder.statusView.setText(entry.getName());
-            holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
-            BufferUtils.setBufferViewStatus(getSherlockActivity(), entry.getStatusBuffer(), holder.statusView);
+            holder.statusView.setTag(
+                groupPosition); //Used in click listener to know what item this is
+            BufferUtils.setBufferViewStatus(getSherlockActivity(), entry.getStatusBuffer(),
+                                            holder.statusView);
             return convertView;
         }
 
@@ -561,9 +604,12 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
         }
 
         public void stopObserving() {
-            if (networks == null) return;
-            for (Network network : networks.getNetworkList())
+            if (networks == null) {
+                return;
+            }
+            for (Network network : networks.getNetworkList()) {
                 network.deleteObserver(this);
+            }
         }
 
     }

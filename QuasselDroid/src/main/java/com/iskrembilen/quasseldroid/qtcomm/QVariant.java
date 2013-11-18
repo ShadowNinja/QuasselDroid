@@ -57,43 +57,50 @@ public class QVariant<T extends Object> {
     }
 
     public T getData() throws EmptyQVariantException {
-        if (data == null)
+        if (data == null) {
             throw new EmptyQVariantException();
+        }
 
         return data;
     }
 
     public boolean isValid() {
-        if (type == QVariantType.Invalid)
+        if (type == QVariantType.Invalid) {
             return false;
-        if (data == null)
+        }
+        if (data == null) {
             return false;
+        }
         return true;
     }
 
-    public static class QVariantSerializer<U extends Object> implements QMetaTypeSerializer<QVariant<U>> {
+    public static class QVariantSerializer<U extends Object> implements
+        QMetaTypeSerializer<QVariant<U>> {
         public QVariantSerializer() {
 
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException, EmptyQVariantException {
+        public QVariant<U> unserialize(QDataInputStream src,
+                                       DataStreamVersion version) throws IOException, EmptyQVariantException {
             int type = (int) src.readUInt(32);
             if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
                 //FIXME: Implement?
                 /*if (u >= MapFromThreeCount)
-		            return;
-		        u = map_from_three[u];
-				 */
+                    return;
+                u = map_from_three[u];
+                 */
             }
             boolean is_null = false;
-            if (version.getValue() >= DataStreamVersion.Qt_4_2.getValue())
+            if (version.getValue() >= DataStreamVersion.Qt_4_2.getValue()) {
                 is_null = src.readUnsignedByte() != 0;
+            }
 
             QVariant<U> ret = new QVariant<U>();
             if (type == QVariantType.UserType.value) {
-                String name = (String) QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version);
+                String name = (String) QMetaTypeRegistry.instance().getTypeForId(
+                                  QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version);
                 name = name.trim();
                 ret.userTypeName = name;
 
@@ -112,26 +119,32 @@ public class QVariant<T extends Object> {
 //				}
 //			}
 
-            ret.type = QVariantType.getByValue(type); //Replaced the iteration shot above, this is much more efficient
+            ret.type = QVariantType.getByValue(
+                           type); //Replaced the iteration shot above, this is much more efficient
 
-            if (ret.type == QVariantType.Invalid) {// || is_null) { //includes data = null; FIXME: is this correct?
+            if (ret.type ==
+                    QVariantType.Invalid) {// || is_null) { //includes data = null; FIXME: is this correct?
                 // Since we wrote something, we should read something
-                QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().unserialize(src, version);
+                QMetaTypeRegistry.instance().getTypeForId(
+                    QMetaType.Type.QString.getValue()).getSerializer().unserialize(src, version);
                 ret.data = null;
                 return ret;
             }
             //Unchecked cast so we can read unknown qvariants at run time and then inspect the contents
             if (ret.type == QVariantType.UserType) {
-                ret.data = (U) QMetaTypeRegistry.instance().getTypeForName(ret.userTypeName).getSerializer().unserialize(src, version);
+                ret.data = (U) QMetaTypeRegistry.instance().getTypeForName(
+                               ret.userTypeName).getSerializer().unserialize(src, version);
             } else {
-                ret.data = (U) QMetaTypeRegistry.instance().getTypeForId(type).getSerializer().unserialize(src, version);
+                ret.data = (U) QMetaTypeRegistry.instance().getTypeForId(
+                               type).getSerializer().unserialize(src, version);
             }
             return ret;
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public void serialize(QDataOutputStream stream, QVariant<U> data, DataStreamVersion version) throws IOException {
+        public void serialize(QDataOutputStream stream, QVariant<U> data,
+                              DataStreamVersion version) throws IOException {
             stream.writeUInt(data.type.getValue(), 32);
             if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
                 //FIXME: Implement?
@@ -141,10 +154,14 @@ public class QVariant<T extends Object> {
 
             if (data.type == QVariantType.UserType) {
 //				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
-                QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
-                QMetaTypeRegistry.instance().getTypeForName(data.getUserTypeName()).getSerializer().serialize(stream, data.data, version);
+                QMetaTypeRegistry.instance().getTypeForId(
+                    QMetaType.Type.QByteArray.getValue()).getSerializer().serialize(stream,
+                            data.getUserTypeName(), version);
+                QMetaTypeRegistry.instance().getTypeForName(
+                    data.getUserTypeName()).getSerializer().serialize(stream, data.data, version);
             } else {
-                QMetaTypeRegistry.instance().getTypeForId(data.type.getValue()).getSerializer().serialize(stream, data.data, version);
+                QMetaTypeRegistry.instance().getTypeForId(data.type.getValue()).getSerializer().serialize(
+                    stream, data.data, version);
             }
         }
 
@@ -157,38 +174,38 @@ public class QVariant<T extends Object> {
 
     public String toString() {
         switch (type) {
-            case ByteArray:
-            case String:
-            case CString:
-                return (String) data;
-            case UInt:
-            case Int:
-            case Bool:
-                return data.toString();
-            case Map:
-                StringBuilder ret = new StringBuilder("( ");
-                Map<Object, Object> map = (Map<Object, Object>) data;
-                for (Map.Entry<Object, Object> element : map.entrySet()) {
-                    ret.append(element.getKey().toString());
-                    ret.append(" : ");
-                    ret.append(element.getValue().toString());
-                    ret.append(", ");
-                }
-                ret.append(" )");
-                return ret.toString();
-            case List:
-                StringBuilder r = new StringBuilder("( ");
-                List<Object> list = (List<Object>) data;
-                for (Object o : list) {
-                    r.append(o.toString());
-                    r.append(", ");
-                }
-                r.append(" )");
-                return r.toString();
-            case UserType:
-                return userTypeName + data;
-            default:
-                return "/" + type.toString() + " [ " + data.toString() + " ]/";
+        case ByteArray:
+        case String:
+        case CString:
+            return (String) data;
+        case UInt:
+        case Int:
+        case Bool:
+            return data.toString();
+        case Map:
+            StringBuilder ret = new StringBuilder("( ");
+            Map<Object, Object> map = (Map<Object, Object>) data;
+            for (Map.Entry<Object, Object> element : map.entrySet()) {
+                ret.append(element.getKey().toString());
+                ret.append(" : ");
+                ret.append(element.getValue().toString());
+                ret.append(", ");
+            }
+            ret.append(" )");
+            return ret.toString();
+        case List:
+            StringBuilder r = new StringBuilder("( ");
+            List<Object> list = (List<Object>) data;
+            for (Object o : list) {
+                r.append(o.toString());
+                r.append(", ");
+            }
+            r.append(" )");
+            return r.toString();
+        case UserType:
+            return userTypeName + data;
+        default:
+            return "/" + type.toString() + " [ " + data.toString() + " ]/";
         }
     }
 }

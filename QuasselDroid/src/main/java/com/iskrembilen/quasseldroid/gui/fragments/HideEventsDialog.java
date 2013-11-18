@@ -43,15 +43,17 @@ public class HideEventsDialog extends SherlockDialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getSherlockActivity());
         builder.setTitle("Hide Events");
 
-        builder.setMultiChoiceItems(getFilterList(), getCheckedList(), new OnMultiChoiceClickListener() {
+        builder.setMultiChoiceItems(getFilterList(), getCheckedList(),
+        new OnMultiChoiceClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                 IrcMessage.Type type = IrcMessage.Type.valueOf(IrcMessage.Type.getFilterList()[which]);
-                if (isChecked)
+                if (isChecked) {
                     BusProvider.getInstance().post(new FilterMessagesEvent(getBufferId(), type, true));
-                else
+                } else {
                     BusProvider.getInstance().post(new FilterMessagesEvent(getBufferId(), type, false));
+                }
             }
         });
         return builder.create();

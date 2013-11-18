@@ -14,11 +14,13 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 
 public class BufferHelper {
     public static void joinChannel(int bufferId, NetworkCollection networks) {
-        BusProvider.getInstance().post(new SendMessageEvent(bufferId, "/join " + networks.getBufferById(bufferId).getInfo().name));
+        BusProvider.getInstance().post(new SendMessageEvent(bufferId,
+                                       "/join " + networks.getBufferById(bufferId).getInfo().name));
     }
 
     public static void partChannel(int bufferId, NetworkCollection networks) {
-        BusProvider.getInstance().post(new SendMessageEvent(bufferId, "/part " + networks.getBufferById(bufferId).getInfo().name));
+        BusProvider.getInstance().post(new SendMessageEvent(bufferId,
+                                       "/part " + networks.getBufferById(bufferId).getInfo().name));
     }
 
     public static void deleteChannel(int bufferId) {
@@ -38,22 +40,24 @@ public class BufferHelper {
     }
 
     public static void disconnectNetwork(int networkId) {
-        BusProvider.getInstance().post(new ManageNetworkEvent(networkId, NetworkAction.DISCONNECT));
+        BusProvider.getInstance().post(new ManageNetworkEvent(networkId,
+                                       NetworkAction.DISCONNECT));
     }
 
     public static void showDeleteConfirmDialog(Context context, final int bufferId) {
         new AlertDialog.Builder(context)
-                .setTitle(R.string.dialog_delete_buffer_title)
-                .setMessage(R.string.dialog_delete_buffer_message)
-                .setPositiveButton(R.string.dialog_delete_buffer_yes, new DialogInterface.OnClickListener() {
+        .setTitle(R.string.dialog_delete_buffer_title)
+        .setMessage(R.string.dialog_delete_buffer_message)
+        .setPositiveButton(R.string.dialog_delete_buffer_yes,
+        new DialogInterface.OnClickListener() {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        BufferHelper.deleteChannel(bufferId);
-                    }
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                BufferHelper.deleteChannel(bufferId);
+            }
 
-                })
-                .setNegativeButton(R.string.dialog_delete_buffer_no, null)
-                .show();
+        })
+        .setNegativeButton(R.string.dialog_delete_buffer_no, null)
+        .show();
     }
 }

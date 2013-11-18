@@ -27,13 +27,17 @@ public class MessageUtil {
      * @param buffer  the buffer the message belongs to
      * @param message the message to check
      */
-    public static void checkMessageForHighlight(String nick, Buffer buffer, IrcMessage message) {
+    public static void checkMessageForHighlight(String nick, Buffer buffer,
+            IrcMessage message) {
         if (message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Action) {
             if (nick == null) {
                 Log.e(TAG, "Nick is null in check message for highlight");
                 return;
-            } else if (nick.equals("")) return;
-            Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + Pattern.quote(nick) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
+            } else if (nick.equals("")) {
+                return;
+            }
+            Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + Pattern.quote(
+                                         nick) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
             Matcher matcher = regexHighlight.matcher(message.content);
             if (matcher.find()) {
                 message.setFlag(IrcMessage.Flag.Highlight);
@@ -57,8 +61,9 @@ public class MessageUtil {
         if (content.indexOf(boldIndicator) == -1
                 && content.indexOf(italicIndicator) == -1
                 && content.indexOf(underlineIndicator) == -1
-                && content.indexOf(colorIndicator) == -1)
+                && content.indexOf(colorIndicator) == -1) {
             return;
+        }
 
         SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
 
@@ -83,7 +88,8 @@ public class MessageUtil {
                     endSearchOffset = start + 1;
                     if (endSearchOffset < content.length()) {
                         if (Character.isDigit(content.charAt(endSearchOffset))) {
-                            if (endSearchOffset + 1 < content.length() && Character.isDigit(content.charAt(endSearchOffset + 1))) {
+                            if (endSearchOffset + 1 < content.length()
+                                    && Character.isDigit(content.charAt(endSearchOffset + 1))) {
                                 fg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 2));
                                 endSearchOffset += 2;
                             } else {
@@ -92,9 +98,11 @@ public class MessageUtil {
                             }
 
                             if (endSearchOffset < content.length() && content.charAt(endSearchOffset) == ',') {
-                                if (endSearchOffset + 1 < content.length() && Character.isDigit(content.charAt(endSearchOffset + 1))) {
+                                if (endSearchOffset + 1 < content.length()
+                                        && Character.isDigit(content.charAt(endSearchOffset + 1))) {
                                     endSearchOffset++;
-                                    if (endSearchOffset + 1 < content.length() && Character.isDigit(content.charAt(endSearchOffset + 1))) {
+                                    if (endSearchOffset + 1 < content.length()
+                                            && Character.isDigit(content.charAt(endSearchOffset + 1))) {
                                         bg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 2));
                                         endSearchOffset += 2;
                                     } else {
@@ -135,15 +143,18 @@ public class MessageUtil {
                 }
             }
 
-            if (start == -1)
+            if (start == -1) {
                 break;
+            }
 
             int norm = content.indexOf(normalIndicator, start + 1);
-            if (norm != -1 && (end == -1 || norm < end))
+            if (norm != -1 && (end == -1 || norm < end)) {
                 end = norm;
+            }
 
-            if (end == -1)
+            if (end == -1) {
                 end = content.length();
+            }
 
             if (end - (start + startIndicatorLength) > 0) {
                 // Only set spans if there's any text between start & end
@@ -155,21 +166,22 @@ public class MessageUtil {
 
                 if (fg != -1) {
                     newString.setSpan(new ForegroundColorSpan(context.getResources()
-                            .getColor(mircCodeToColor(fg))), start, end,
-                            Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                                      .getColor(mircCodeToColor(fg))), start, end,
+                                      Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
                 if (bg != -1) {
                     newString.setSpan(new BackgroundColorSpan(context.getResources()
-                            .getColor(mircCodeToColor(bg))), start, end,
-                            Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                                      .getColor(mircCodeToColor(bg))), start, end,
+                                      Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
             }
 
             // Intentionally don't remove "normal" indicators or color here, as they are multi-purpose
             if (end < content.length() && (content.charAt(end) == boldIndicator
-                    || content.charAt(end) == italicIndicator
-                    || content.charAt(end) == underlineIndicator))
+                                           || content.charAt(end) == italicIndicator
+                                           || content.charAt(end) == underlineIndicator)) {
                 newString.delete(end, end + 1);
+            }
 
             newString.delete(start, start + startIndicatorLength);
         }
@@ -178,15 +190,18 @@ public class MessageUtil {
         while (true) {
             content = newString.toString();
             int normPos = content.indexOf(normalIndicator);
-            if (normPos != -1)
+            if (normPos != -1) {
                 newString.delete(normPos, normPos + 1);
+            }
 
             int colorPos = content.indexOf(colorIndicator);
-            if (colorPos != -1)
+            if (colorPos != -1) {
                 newString.delete(colorPos, colorPos + 1);
+            }
 
-            if (normPos == -1 && colorPos == -1)
+            if (normPos == -1 && colorPos == -1) {
                 break;
+            }
         }
 
         message.content = newString;
@@ -195,53 +210,53 @@ public class MessageUtil {
     public static int mircCodeToColor(int code) {
         int color;
         switch (code) {
-            case 0: // white
-                color = R.color.ircmessage_white;
-                break;
-            case 1: // black
-                color = R.color.ircmessage_black;
-                break;
-            case 2: // blue (navy)
-                color = R.color.ircmessage_blue;
-                break;
-            case 3: // green
-                color = R.color.ircmessage_green;
-                break;
-            case 4: // red
-                color = R.color.ircmessage_red;
-                break;
-            case 5: // brown (maroon)
-                color = R.color.ircmessage_brown;
-                break;
-            case 6: // purple
-                color = R.color.ircmessage_purple;
-                break;
-            case 7: // orange (olive)
-                color = R.color.ircmessage_orange;
-                break;
-            case 8: // yellow
-                color = R.color.ircmessage_yellow;
-                break;
-            case 9: // light green (lime)
-                color = R.color.ircmessage_light_green;
-                break;
-            case 10: // teal (a green/blue cyan)
-                color = R.color.ircmessage_teal;
-                break;
-            case 11: // light cyan (cyan) (aqua)
-                color = R.color.ircmessage_light_cyan;
-                break;
-            case 12: // light blue (royal)
-                color = R.color.ircmessage_light_blue;
-                break;
-            case 13: // pink (light purple) (fuchsia)
-                color = R.color.ircmessage_pink;
-                break;
-            case 14: // grey
-                color = R.color.ircmessage_gray;
-                break;
-            default:
-                color = ThemeUtil.chatPlainResource;
+        case 0: // white
+            color = R.color.ircmessage_white;
+            break;
+        case 1: // black
+            color = R.color.ircmessage_black;
+            break;
+        case 2: // blue (navy)
+            color = R.color.ircmessage_blue;
+            break;
+        case 3: // green
+            color = R.color.ircmessage_green;
+            break;
+        case 4: // red
+            color = R.color.ircmessage_red;
+            break;
+        case 5: // brown (maroon)
+            color = R.color.ircmessage_brown;
+            break;
+        case 6: // purple
+            color = R.color.ircmessage_purple;
+            break;
+        case 7: // orange (olive)
+            color = R.color.ircmessage_orange;
+            break;
+        case 8: // yellow
+            color = R.color.ircmessage_yellow;
+            break;
+        case 9: // light green (lime)
+            color = R.color.ircmessage_light_green;
+            break;
+        case 10: // teal (a green/blue cyan)
+            color = R.color.ircmessage_teal;
+            break;
+        case 11: // light cyan (cyan) (aqua)
+            color = R.color.ircmessage_light_cyan;
+            break;
+        case 12: // light blue (royal)
+            color = R.color.ircmessage_light_blue;
+            break;
+        case 13: // pink (light purple) (fuchsia)
+            color = R.color.ircmessage_pink;
+            break;
+        case 14: // grey
+            color = R.color.ircmessage_gray;
+            break;
+        default:
+            color = ThemeUtil.chatPlainResource;
         }
         return color;
     }

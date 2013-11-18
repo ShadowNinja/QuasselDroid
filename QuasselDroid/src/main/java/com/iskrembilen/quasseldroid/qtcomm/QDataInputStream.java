@@ -39,19 +39,20 @@ public class QDataInputStream extends DataInputStream {
 
     public long readUInt(int size) throws IOException {
         switch (size) {
-            case 64:
-                return readLong();
-            case 32:
-                readFully(buf);
-                long ret = ((buf[0] & 255) << 24 | (buf[1] & 255) << 16 | (buf[2] & 255) << 8 | (buf[3] & 255)) & 0xFFFFFFFFL;
-                return ret;
-            case 16:
-                return readUnsignedShort();
-            case 8:
-                return readUnsignedByte();
-            default:
-                System.err.println("No support for reading unsigned ints of size " + size);
-                return 0; // fuck you too
+        case 64:
+            return readLong();
+        case 32:
+            readFully(buf);
+            long ret = ((buf[0] & 255) << 24 | (buf[1] & 255) << 16 | (buf[2] & 255) << 8 |
+                        (buf[3] & 255)) & 0xFFFFFFFFL;
+            return ret;
+        case 16:
+            return readUnsignedShort();
+        case 8:
+            return readUnsignedByte();
+        default:
+            System.err.println("No support for reading unsigned ints of size " + size);
+            return 0; // fuck you too
         }
     }
 }

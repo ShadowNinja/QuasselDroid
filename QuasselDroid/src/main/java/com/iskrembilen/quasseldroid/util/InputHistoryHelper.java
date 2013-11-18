@@ -28,8 +28,9 @@ public class InputHistoryHelper {
         if (currentIndex >= 0) {
             currentIndex--;
         }
-        if (currentIndex == -1)
+        if (currentIndex == -1) {
             return tempStore;
+        }
 
         return history.get(currentIndex);
     }
@@ -40,7 +41,8 @@ public class InputHistoryHelper {
     }
 
     public static void tempStoreCurrentEntry(String text) {
-        if (currentIndex == -1)
+        if (currentIndex == -1) {
             tempStore = text;
+        }
     }
 }

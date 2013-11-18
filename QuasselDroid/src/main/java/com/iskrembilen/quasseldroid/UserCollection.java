@@ -207,7 +207,8 @@ public class UserCollection extends Observable implements Observer {
         }
     }
 
-    private boolean isIrcUserAlreadyAddedWithAHigherRankingMode(IrcMode currentMode, IrcUser user) {
+    private boolean isIrcUserAlreadyAddedWithAHigherRankingMode(IrcMode currentMode,
+            IrcUser user) {
         boolean found = false;
         for (IrcMode mode : IrcMode.values()) {
             if (uniqueUsers.get(mode).contains(user)) {

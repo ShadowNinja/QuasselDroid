@@ -28,18 +28,21 @@ public class NickCompletionHelper extends Filter {
         if (lastStringResult != null && inputText.equals(lastStringResult)) {
             if (lastFilteredResults.count > lastFilteredIndex + 1) {
                 lastFilteredIndex += 1;
-                setNewContent(inputField, ((List<IrcUser>) lastFilteredResults.values).get(lastFilteredIndex).nick);
+                setNewContent(inputField, ((List<IrcUser>) lastFilteredResults.values).get(
+                                  lastFilteredIndex).nick);
             } else if (lastFilteredResults.count > 0) {
                 System.out.println("yes");
                 lastFilteredIndex = 0;
-                setNewContent(inputField, ((List<IrcUser>) lastFilteredResults.values).get(lastFilteredIndex).nick);
+                setNewContent(inputField, ((List<IrcUser>) lastFilteredResults.values).get(
+                                  lastFilteredIndex).nick);
             }
             return;
         }
         this.inputField = inputField;
         String[] inputWords = inputText.split(" ");
         String inputNick = inputWords[inputWords.length - 1];
-        nickStart = inputText.lastIndexOf(" ") == -1 ? 0 : inputText.substring(0, inputText.lastIndexOf(" ")).length();
+        nickStart = inputText.lastIndexOf(" ") == -1 ? 0 : inputText.substring(0,
+                    inputText.lastIndexOf(" ")).length();
         filter(inputNick);
     }
 
@@ -69,8 +72,11 @@ public class NickCompletionHelper extends Filter {
     }
 
     private void setNewContent(EditText input, String nick) {
-        if (input == null) return;
-        String newContent = input.getText().toString().substring(0, nickStart) + (nickStart == 0 ? "" : " ") + nick + ((nickStart == 0 ? ": " : " "));
+        if (input == null) {
+            return;
+        }
+        String newContent = input.getText().toString().substring(0,
+                            nickStart) + (nickStart == 0 ? "" : " ") + nick + ((nickStart == 0 ? ": " : " "));
         lastStringResult = newContent;
         input.setText(newContent);
         input.setSelection(newContent.length());

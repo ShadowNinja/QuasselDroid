@@ -117,7 +117,9 @@ public class BufferCollection extends Observable implements Observer {
 //			}
             buffer.addObserver(this);
         }
-        if (!changed) return;
+        if (!changed) {
+            return;
+        }
 
         Collections.sort(bufferList);
         filterBuffers();
@@ -128,8 +130,9 @@ public class BufferCollection extends Observable implements Observer {
     private void filterBuffers() {
         filteredList.clear();
         for (Buffer buf : bufferList) {
-            if (!isBufferFiltered(buf))
+            if (!isBufferFiltered(buf)) {
                 filteredList.add(buf);
+            }
         }
     }
 

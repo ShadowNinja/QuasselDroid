@@ -28,7 +28,8 @@ public class NetworkServer {
 
     public NetworkServer(String host, long port, String password,
                          boolean useSsl, long sslVersion,
-                         boolean useProxy, String proxyHost, long proxyPort, long proxyType, String proxyUser, String proxyPassword) {
+                         boolean useProxy, String proxyHost, long proxyPort, long proxyType, String proxyUser,
+                         String proxyPassword) {
         this.host = host;
         this.port = port;
         this.password = password;

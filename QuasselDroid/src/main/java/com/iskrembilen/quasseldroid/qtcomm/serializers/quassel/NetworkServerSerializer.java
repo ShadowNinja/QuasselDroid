@@ -43,24 +43,26 @@ public class NetworkServerSerializer implements QMetaTypeSerializer<NetworkServe
 
     @SuppressWarnings("unchecked")
     @Override
-    public NetworkServer unserialize(QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
+    public NetworkServer unserialize(QDataInputStream stream,
+                                     DataStreamVersion version) throws IOException, EmptyQVariantException {
         Map<String, QVariant<?>> map = (Map<String, QVariant<?>>)
-                QMetaTypeRegistry.instance().getTypeForName("QVariantMap").getSerializer().unserialize(stream, version);
+                                       QMetaTypeRegistry.instance().getTypeForName("QVariantMap").getSerializer().unserialize(
+                                           stream, version);
 
         return new NetworkServer((String) map.get("Host").getData(),
-                (Long) map.get("Port").getData(),
-                (String) map.get("Password").getData(),
+                                 (Long) map.get("Port").getData(),
+                                 (String) map.get("Password").getData(),
 
-                (Boolean) map.get("UseSSL").getData(),
-                (Integer) map.get("sslVersion").getData(),
+                                 (Boolean) map.get("UseSSL").getData(),
+                                 (Integer) map.get("sslVersion").getData(),
 
-                (Boolean) map.get("UseProxy").getData(),
-                (String) map.get("ProxyHost").getData(),
-                (Long) map.get("ProxyPort").getData(),
-                (Integer) map.get("ProxyType").getData(),
-                (String) map.get("ProxyUser").getData(),
-                (String) map.get("ProxyPass").getData()
-        );
+                                 (Boolean) map.get("UseProxy").getData(),
+                                 (String) map.get("ProxyHost").getData(),
+                                 (Long) map.get("ProxyPort").getData(),
+                                 (Integer) map.get("ProxyType").getData(),
+                                 (String) map.get("ProxyUser").getData(),
+                                 (String) map.get("ProxyPass").getData()
+                                );
 
     }
 

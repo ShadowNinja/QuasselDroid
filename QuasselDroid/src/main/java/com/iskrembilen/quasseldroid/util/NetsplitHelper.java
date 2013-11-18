@@ -38,11 +38,13 @@ public class NetsplitHelper {
     }
 
     public String formatJoinMessage() {
-        return "Netsplit between " + sideOne + " and " + sideTwo + " ended. Users joined: " + formatNickList();
+        return "Netsplit between " + sideOne + " and " + sideTwo + " ended. Users joined: " +
+               formatNickList();
     }
 
     public String formatQuitMessage() {
-        return "Netsplit between " + sideOne + " and " + sideTwo + ". Users quit: " + formatNickList();
+        return "Netsplit between " + sideOne + " and " + sideTwo + ". Users quit: " +
+               formatNickList();
     }
 
     private String formatNickList() {

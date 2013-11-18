@@ -119,7 +119,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
         //Default active to true if channel is a query buffer, they are "always" active
         //TODO: in quassel query are shown as offline if no shared channel, fix later
-        if (info.type == BufferInfo.Type.QueryBuffer) active = true;
+        if (info.type == BufferInfo.Type.QueryBuffer) {
+            active = true;
+        }
 
         loadFilters();
     }
@@ -145,18 +147,22 @@ public class Buffer extends Observable implements Comparable<Buffer> {
             lastHighlightMessageId = message.messageId;
             this.setChanged();
         }
-        if ((message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Action) && message.messageId > lastPlainMessageId) {
+        if ((message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Action)
+                && message.messageId > lastPlainMessageId) {
             lastPlainMessageId = message.messageId;
             this.setChanged();
         }
 
         insertMessageInBufferList(backlog, message);
         if (filterTypes.size() != 0 && !isMessageFiltered(message)) {
-            if (isMarkerLineFiltered && getMarkerLineMessage() == message.messageId)
+            if (isMarkerLineFiltered && getMarkerLineMessage() == message.messageId) {
                 isMarkerLineFiltered = false;
+            }
             insertMessageInBufferList(filteredBacklog, message);
         } else {
-            if (getMarkerLineMessage() == message.messageId) isMarkerLineFiltered = true;
+            if (getMarkerLineMessage() == message.messageId) {
+                isMarkerLineFiltered = true;
+            }
         }
     }
 
@@ -237,7 +243,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @return true if buffer has unseen highlights, otherwise false
      */
     public boolean hasUnseenHighlight() {
-        if (backlog.size() != 0 && lastSeenMessage != 0 && lastHighlightMessageId > lastSeenMessage) {
+        if (backlog.size() != 0 && lastSeenMessage != 0
+                && lastHighlightMessageId > lastSeenMessage) {
             return true;
         }
         return false;
@@ -260,11 +267,13 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      */
     public boolean hasUnreadActivity() {
         //Last message in the backlog has a bigger messageId than the last seen message
-        if (backlog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < backlog.get(backlog.size() - 1).messageId) {
+        if (backlog.size() != 0 && lastSeenMessage != 0
+                && lastSeenMessage < backlog.get(backlog.size() - 1).messageId) {
             return true;
         }
-        if (lastSeenMessage == -1)
+        if (lastSeenMessage == -1) {
             return true;
+        }
 
         return false;
     }
@@ -387,8 +396,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * Set this buffer as read TODO: we dont really know what this means atm
      */
     public void setRead() {
-        if (backlog.isEmpty())
+        if (backlog.isEmpty()) {
             return;
+        }
 
         lastSeenMessage = backlog.get(backlog.size() - 1).messageId;
     }
@@ -550,9 +560,13 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         filteredBacklog.clear();
         for (IrcMessage msg : backlog) {
             if (!isMessageFiltered(msg)) {
-                if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = false;
+                if (getMarkerLineMessage() == msg.messageId) {
+                    isMarkerLineFiltered = false;
+                }
                 filteredBacklog.add(msg);
-            } else if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = true;
+            } else if (getMarkerLineMessage() == msg.messageId) {
+                isMarkerLineFiltered = true;
+            }
         }
     }
 

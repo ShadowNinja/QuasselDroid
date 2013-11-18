@@ -104,8 +104,9 @@ public enum QVariantType {
     private static final Map<Integer, QVariantType> lookup = new HashMap<Integer, QVariantType>();
 
     static {
-        for (QVariantType s : EnumSet.allOf(QVariantType.class))
+        for (QVariantType s : EnumSet.allOf(QVariantType.class)) {
             lookup.put(s.getValue(), s);
+        }
     }
 
 

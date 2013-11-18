@@ -57,10 +57,13 @@ public class QuasselDbHelper {
     public static final String CERTIFICATE_TABLE = "certificates";
     public static final String HIDDENEVENTS_TABLE = "hiddenevents";
     private static final String DATABASE_CREATE_TABLE1 =
-            "create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
-    private static final String DATABASE_CREATE_TABLE2 = "create table certificates (certificate text, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE);";
-    private static final String DATABASE_CREATE_TABLE3 = "create table hiddenevents (bufferid integer not null, event text not null);";
-    private static final String DATABASE_CREATE_TABLE4 = "CREATE TABLE user(userid integer primary key autoincrement, username text not null, password text not null, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE)";
+        "create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
+    private static final String DATABASE_CREATE_TABLE2 =
+        "create table certificates (certificate text, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE);";
+    private static final String DATABASE_CREATE_TABLE3 =
+        "create table hiddenevents (bufferid integer not null, event text not null);";
+    private static final String DATABASE_CREATE_TABLE4 =
+        "CREATE TABLE user(userid integer primary key autoincrement, username text not null, password text not null, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE)";
     private static final int DATABASE_VERSION = 2;
 
     private static final String TAG = "DbHelper";
@@ -83,7 +86,7 @@ public class QuasselDbHelper {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
+                  + newVersion + ", which will destroy all old data");
             if (oldVersion <= 1) {
                 db.execSQL("DROP TABLE IF EXISTS " + CORE_TABLE);
                 db.execSQL("DROP TABLE IF EXISTS " + CERTIFICATE_TABLE);
@@ -129,7 +132,8 @@ public class QuasselDbHelper {
     }
 
     public boolean hasCores() {
-        Cursor c = db.query(CORE_TABLE, new String[]{KEY_ID, KEY_NAME}, null, null, null, null, null);
+        Cursor c = db.query(CORE_TABLE, new String[] {KEY_ID, KEY_NAME}, null, null, null, null,
+                            null);
         boolean hasCores;
         if (c != null && c.getCount() > 0) {
             hasCores = true;
@@ -137,16 +141,20 @@ public class QuasselDbHelper {
             hasCores = false;
         }
 
-        if (c != null) c.close();
+        if (c != null) {
+            c.close();
+        }
         return hasCores;
     }
 
     public Cursor getAllCores() {
-        return db.query(CORE_TABLE, new String[]{KEY_ID, KEY_NAME}, null, null, null, null, null);
+        return db.query(CORE_TABLE, new String[] {KEY_ID, KEY_NAME}, null, null, null, null,
+                        null);
     }
 
     public Bundle getCore(long rowId) throws SQLException {
-        Cursor cursor = db.query(true, CORE_TABLE, new String[]{KEY_ADDRESS, KEY_PORT, KEY_NAME, KEY_SSL}, KEY_ID + "=" + rowId, null, null, null, null, null);
+        Cursor cursor = db.query(true, CORE_TABLE, new String[] {KEY_ADDRESS, KEY_PORT, KEY_NAME, KEY_SSL},
+                                 KEY_ID + "=" + rowId, null, null, null, null, null);
         Bundle b = new Bundle();
         if (cursor != null) {
             cursor.moveToFirst();
@@ -159,7 +167,8 @@ public class QuasselDbHelper {
         return b;
     }
 
-    public void updateCore(long rowId, String name, String address, int port, boolean useSSL) {
+    public void updateCore(long rowId, String name, String address, int port,
+                           boolean useSSL) {
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, name);
         args.put(KEY_ADDRESS, address);
@@ -184,7 +193,8 @@ public class QuasselDbHelper {
     }
 
     public String getCertificate(long coreId) {
-        Cursor c = db.query(CERTIFICATE_TABLE, new String[]{KEY_CERTIFICATE}, KEY_COREIDREFERENCE + "=" + coreId, null, null, null, null);
+        Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, KEY_COREIDREFERENCE
+                            + "=" + coreId, null, null, null, null);
         String cert = null;
         if (c != null && c.getCount() > 0) {
             c.moveToFirst();
@@ -222,7 +232,8 @@ public class QuasselDbHelper {
     }
 
     public Bundle getUser(long id) throws SQLException {
-        Cursor cursor = db.query(true, USER_TABLE, new String[]{KEY_USERNAME, KEY_PASSWORD}, KEY_COREIDREFERENCE + "=" + id, null, null, null, null, null);
+        Cursor cursor = db.query(true, USER_TABLE, new String[] {KEY_USERNAME, KEY_PASSWORD},
+                                 KEY_COREIDREFERENCE + "=" + id, null, null, null, null, null);
         Bundle b = null;
         if (cursor != null && cursor.getCount() > 0) {
             b = new Bundle();
@@ -239,8 +250,9 @@ public class QuasselDbHelper {
     }
 
     public void cleanupEvents(Integer[] bufferids) {
-        if (bufferids.length == 0)
+        if (bufferids.length == 0) {
             return;
+        }
         StringBuilder list = new StringBuilder("(");
         for (int id : bufferids) {
             list.append(id + ",");
@@ -251,11 +263,13 @@ public class QuasselDbHelper {
     }
 
     public void deleteHiddenEvent(IrcMessage.Type event, int bufferId) {
-        db.delete(HIDDENEVENTS_TABLE, KEY_EVENT + "='" + event.name() + "' AND " + KEY_BUFFERID + "=" + bufferId, null);
+        db.delete(HIDDENEVENTS_TABLE,
+                  KEY_EVENT + "='" + event.name() + "' AND " + KEY_BUFFERID + "=" + bufferId, null);
     }
 
     public IrcMessage.Type[] getHiddenEvents(int bufferId) throws SQLException {
-        Cursor cursor = db.query(true, HIDDENEVENTS_TABLE, new String[]{KEY_EVENT}, KEY_BUFFERID + "=" + bufferId, null, null, null, null, null);
+        Cursor cursor = db.query(true, HIDDENEVENTS_TABLE, new String[] {KEY_EVENT}, KEY_BUFFERID
+                                 + "=" + bufferId, null, null, null, null, null);
         IrcMessage.Type[] events = null;
         if (cursor != null) {
             if (cursor.getCount() > 0) {

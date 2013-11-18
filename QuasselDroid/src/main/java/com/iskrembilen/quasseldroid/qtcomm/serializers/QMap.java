@@ -48,7 +48,7 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
     @Override
     public void serialize(QDataOutputStream stream,
                           Map<T, V> data, DataStreamVersion version)
-            throws IOException {
+    throws IOException {
         stream.writeUInt(data.size(), 32);
         keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
         valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
@@ -68,7 +68,8 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
         valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
         int len = (int) stream.readUInt(32);
         for (int i = 0; i < len; i++) {
-            map.put((T) keySerializer.unserialize(stream, version), (V) valueSerializer.unserialize(stream, version));
+            map.put((T) keySerializer.unserialize(stream, version),
+                    (V) valueSerializer.unserialize(stream, version));
         }
         return map;
     }

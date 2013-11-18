@@ -48,10 +48,11 @@ public class QString implements QMetaTypeSerializer<String> {
 
     @Override
     public String unserialize(QDataInputStream stream, DataStreamVersion version)
-            throws IOException {
+    throws IOException {
         int len = (int) stream.readUInt(32);
-        if (len == 0xFFFFFFFF)
+        if (len == 0xFFFFFFFF) {
             return "";
+        }
 
         return stringReader.readString(stream, len);
     }

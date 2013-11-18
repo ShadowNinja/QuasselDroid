@@ -32,17 +32,20 @@ public class JoinChannelDialog extends SherlockDialogFragment {
     public void onActivityCreated(Bundle arg0) {
         super.onActivityCreated(arg0);
         getDialog().setTitle("Join Channel");
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getSherlockActivity(), android.R.layout.simple_spinner_item, getNetworkNames());
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getSherlockActivity(),
+                android.R.layout.simple_spinner_item, getNetworkNames());
         networkSpinner.setAdapter(adapter);
 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.dialog_join_channel, container, false);
 
         networkSpinner = (Spinner) root.findViewById(R.id.dialog_join_channel_network_spinner);
-        channelNameField = (EditText) root.findViewById(R.id.dialog_join_channel_channel_name_field);
+        channelNameField = (EditText) root.findViewById(
+                               R.id.dialog_join_channel_channel_name_field);
 
         OnClickListener buttonListener = new OnClickListener() {
 
@@ -51,7 +54,8 @@ public class JoinChannelDialog extends SherlockDialogFragment {
                 if (v.getId() == R.id.dialog_join_channel_cancel_button) {
                     getDialog().dismiss();
 
-                } else if (v.getId() == R.id.dialog_join_channel_join_button && !channelNameField.getText().toString().equals("")) {
+                } else if (v.getId() == R.id.dialog_join_channel_join_button
+                           && !channelNameField.getText().toString().equals("")) {
                     String channelName = channelNameField.getText().toString().trim();
                     String networkSelected = (String) networkSpinner.getSelectedItem();
                     BusProvider.getInstance().post(new JoinChannelEvent(networkSelected, channelName));
@@ -59,8 +63,10 @@ public class JoinChannelDialog extends SherlockDialogFragment {
                 }
             }
         };
-        root.findViewById(R.id.dialog_join_channel_join_button).setOnClickListener(buttonListener);
-        root.findViewById(R.id.dialog_join_channel_cancel_button).setOnClickListener(buttonListener);
+        root.findViewById(R.id.dialog_join_channel_join_button).setOnClickListener(
+            buttonListener);
+        root.findViewById(R.id.dialog_join_channel_cancel_button).setOnClickListener(
+            buttonListener);
 
         return root;
     }

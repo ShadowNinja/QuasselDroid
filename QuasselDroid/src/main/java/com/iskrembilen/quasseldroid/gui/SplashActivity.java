@@ -31,10 +31,12 @@ public class SplashActivity extends SherlockActivity {
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
         //Init crittercism
-        boolean isDebugbuild = (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE));
+        boolean isDebugbuild = (0 != (getApplicationInfo().flags &=
+                                          ApplicationInfo.FLAG_DEBUGGABLE));
         if (!isDebugbuild && getResources().getBoolean(R.bool.use_crittercism)) {
             Log.i(TAG, "Enabeling Crittercism");
-            Crittercism.init(getApplicationContext(), getResources().getString(R.string.crittercism_api_key));
+            Crittercism.init(getApplicationContext(),
+                             getResources().getString(R.string.crittercism_api_key));
         }
         setContentView(R.layout.splash);
         getSupportActionBar().hide();
@@ -49,9 +51,11 @@ public class SplashActivity extends SherlockActivity {
 
             @Override
             public void run() {
-                if (activityToStart != null)
+                if (activityToStart != null) {
                     startActivity(activityToStart);
-                else startActivity(LoginActivity.class);
+                } else {
+                    startActivity(LoginActivity.class);
+                }
             }
         }, SPLASH_DISPLAY_LENGTH);
     }

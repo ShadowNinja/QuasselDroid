@@ -38,18 +38,20 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
         int a = (14 - data.get(Calendar.MONTH)) / 12;
         int y = data.get(Calendar.YEAR) + 4800 - a;
         int m = data.get(Calendar.MONTH) + 12 * a - 3;
-        int jdn = data.get(Calendar.DAY_OF_MONTH) + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045;
+        int jdn = data.get(Calendar.DAY_OF_MONTH) + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100
+                  + y / 400 - 32045;
         stream.writeUInt(jdn, 32);
 
 
-        int secondsSinceMidnight = data.get(Calendar.HOUR) * 3600 + data.get(Calendar.MINUTE) * 60 + data.get(Calendar.SECOND);
+        int secondsSinceMidnight = data.get(Calendar.HOUR) * 3600 + data.get(
+                                       Calendar.MINUTE) * 60 + data.get(Calendar.SECOND);
         stream.writeUInt(secondsSinceMidnight, 32);
 
-        if (data.getTimeZone().equals(TimeZone.getTimeZone("UTC")))
+        if (data.getTimeZone().equals(TimeZone.getTimeZone("UTC"))) {
             stream.writeUInt(1, 8);
-        else if (data.getTimeZone().equals(TimeZone.getDefault()))
+        } else if (data.getTimeZone().equals(TimeZone.getDefault())) {
             stream.writeUInt(0, 8);
-        else {
+        } else {
             System.err.println("We can't serialize dates in other timezones! FIXME");
             stream.writeUInt(0, 8);
         }
@@ -63,8 +65,8 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
         long secondsSinceMidnight = stream.readUInt(32);
         long isUTC = stream.readUInt(8);
 
-        double J = (double) (julianDay) + 0.5f;
-        long j = (int) (J + 32044);
+        double J = (double)(julianDay) + 0.5f;
+        long j = (int)(J + 32044);
         long g = j / 146097;
         long dg = j % 146097;
         long c = (((dg / 36524) + 1) * 3) / 4;
@@ -77,19 +79,21 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
         long m = (da * 5 + 308) / 153 - 2;
         long d = da - (m + 4) * 153 / 5 + 122;
 
-        int year = (int) (y - 4800 + (m + 2) / 12);
-        int month = (int) ((m + 2) % 12 + 1);
-        int day = (int) (d + 1);
+        int year = (int)(y - 4800 + (m + 2) / 12);
+        int month = (int)((m + 2) % 12 + 1);
+        int day = (int)(d + 1);
 
-        int hour = (int) (secondsSinceMidnight / 3600000L);
-        int minute = (int) ((secondsSinceMidnight - (hour * 3600000L)) / 60000L);
-        int second = (int) ((secondsSinceMidnight - (hour * 3600000L) - (minute * 60000L)) / 1000L);
+        int hour = (int)(secondsSinceMidnight / 3600000L);
+        int minute = (int)((secondsSinceMidnight - (hour * 3600000L)) / 60000L);
+        int second = (int)((secondsSinceMidnight - (hour * 3600000L) -
+                            (minute * 60000L)) / 1000L);
 
         TimeZone zone;
-        if (isUTC == 1)
+        if (isUTC == 1) {
             zone = TimeZone.getTimeZone("UTC");
-        else
+        } else {
             zone = TimeZone.getDefault();
+        }
 
         Calendar cal = Calendar.getInstance(zone);
         cal.set(year, month, day, hour, minute, second);

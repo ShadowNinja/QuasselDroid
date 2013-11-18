@@ -45,7 +45,7 @@ public class UnsignedInteger implements QMetaTypeSerializer<Long> {
 
     @Override
     public Long unserialize(QDataInputStream stream, DataStreamVersion version)
-            throws IOException {
+    throws IOException {
         return stream.readUInt(this.size);
     }
 }

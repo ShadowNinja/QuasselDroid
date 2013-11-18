@@ -46,8 +46,9 @@ public class BufferInfo {
 
         public static Type getType(int value) {
             for (Type t : values()) {
-                if (t.value == value)
+                if (t.value == value) {
                     return t;
+                }
             }
             return InvalidBuffer;
         }

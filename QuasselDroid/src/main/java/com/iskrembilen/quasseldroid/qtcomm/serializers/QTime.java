@@ -45,12 +45,13 @@ public class QTime implements QMetaTypeSerializer<Calendar> {
 
     @Override
     public Calendar unserialize(QDataInputStream stream, DataStreamVersion version)
-            throws IOException {
+    throws IOException {
         long millisSinceMidnight = stream.readUInt(32);
-        int hour = (int) (millisSinceMidnight / 3600000L);
-        int minute = (int) ((millisSinceMidnight - (hour * 3600000L)) / 60000L);
-        int second = (int) ((millisSinceMidnight - (hour * 3600000L) - (minute * 60000L)) / 1000L);
-        int millis = (int) ((millisSinceMidnight - (hour * 3600000L) - (minute * 60000L) - (second * 1000L)));
+        int hour = (int)(millisSinceMidnight / 3600000L);
+        int minute = (int)((millisSinceMidnight - (hour * 3600000L)) / 60000L);
+        int second = (int)((millisSinceMidnight - (hour * 3600000L) - (minute * 60000L)) / 1000L);
+        int millis = (int)((millisSinceMidnight - (hour * 3600000L) - (minute * 60000L) -
+                            (second * 1000L)));
 
         Calendar ret = new GregorianCalendar();
         ret.set(Calendar.HOUR, hour);
